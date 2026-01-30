@@ -30,14 +30,14 @@ export function ProductListing({ onAddToCart }: ProductListingProps) {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const response = await fetch(`http://localhost:5001/api/v1/products?page=${currentPage}&limit=10`)
+        const response = await fetch(`https://lot-ecom-backend.onrender.com/api/v1/products?page=${currentPage}&limit=10`)
         
         if (!response.ok) {
           if (response.status === 429) {
             // Rate limited, wait and retry once
             console.log('Rate limited, waiting 2 seconds...')
             await new Promise(resolve => setTimeout(resolve, 2000))
-            const retryResponse = await fetch(`http://localhost:5001/api/v1/products?page=${currentPage}&limit=10`)
+            const retryResponse = await fetch(`https://lot-ecom-backend.onrender.com/api/v1/products?page=${currentPage}&limit=10`)
             if (retryResponse.ok) {
               const data = await retryResponse.json()
               setProducts(data.products || data.data || [])

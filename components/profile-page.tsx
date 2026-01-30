@@ -37,7 +37,7 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
 
         console.log('Fetching user data with token:', token)
         
-        const response = await fetch('http://localhost:5001/api/v1/auth/me', {
+        const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/me', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
 
       console.log('Updating profile with data:', formData)
       
-      const response = await fetch('http://localhost:5001/api/v1/auth/updateprofile', {
+      const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/updateprofile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

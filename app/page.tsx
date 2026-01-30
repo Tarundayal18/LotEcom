@@ -33,7 +33,7 @@ export default function Home() {
         fetchCartData()
         
         // Optional: Validate token with API (but don't logout if it fails)
-        fetch('http://localhost:5001/api/v1/auth/me', {
+        fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/me', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export default function Home() {
 
       console.log('Fetching cart data')
       
-      const response = await fetch('http://localhost:5001/api/v1/cart', {
+      const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/cart', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ export default function Home() {
           // Rate limited, wait and retry once
           console.log('Cart API rate limited, waiting 2 seconds...')
           await new Promise(resolve => setTimeout(resolve, 2000))
-          const retryResponse = await fetch('http://localhost:5001/api/v1/cart', {
+          const retryResponse = await fetch('https://lot-ecom-backend.onrender.com/api/v1/cart', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -173,7 +173,7 @@ export default function Home() {
 
       console.log('Adding to cart:', product)
       
-      const response = await fetch('http://localhost:5001/api/v1/cart', {
+      const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/cart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -212,7 +212,7 @@ export default function Home() {
 
       console.log('Removing from cart:', productId)
       
-      const response = await fetch(`http://localhost:5001/api/v1/cart/item/${productId}`, {
+      const response = await fetch(`https://lot-ecom-backend.onrender.com/api/v1/cart/item/${productId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -264,7 +264,7 @@ export default function Home() {
 
         // Try PUT API first, if it fails, fallback to POST API to add item with new quantity
         try {
-          const response = await fetch(`http://localhost:5001/api/v1/cart/item/${productId}`, {
+          const response = await fetch(`https://lot-ecom-backend.onrender.com/api/v1/cart/item/${productId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -286,7 +286,7 @@ export default function Home() {
           // Fallback: Remove item and add it again with new quantity
           try {
             // Remove the item first
-            await fetch(`http://localhost:5001/api/v1/cart/item/${productId}`, {
+            await fetch(`https://lot-ecom-backend.onrender.com/api/v1/cart/item/${productId}`, {
               method: 'DELETE',
               headers: {
                 'Content-Type': 'application/json',
@@ -295,7 +295,7 @@ export default function Home() {
             })
             
             // Add it back with new quantity
-            const response = await fetch('http://localhost:5001/api/v1/cart', {
+            const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/cart', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -345,7 +345,7 @@ export default function Home() {
 
       console.log('Creating checkout estimate...')
       
-      const response = await fetch('http://localhost:5001/api/v1/estimate/create', {
+      const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/estimate/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -394,7 +394,7 @@ export default function Home() {
 
       console.log('Clearing entire cart')
       
-      const response = await fetch('http://localhost:5001/api/v1/cart', {
+      const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/cart', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
