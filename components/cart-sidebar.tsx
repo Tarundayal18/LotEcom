@@ -14,10 +14,12 @@ interface CartSidebarProps {
   onClose: () => void
   items: CartItem[]
   onRemove: (productId: string) => void
+  onUpdateQuantity: (productId: string, quantity: number) => void
   onClearAll: () => void
+  onCheckout: () => void
 }
 
-export function CartSidebar({ isOpen, onClose, items, onRemove, onClearAll }: CartSidebarProps) {
+export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity, onClearAll, onCheckout }: CartSidebarProps) {
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   return (
@@ -60,6 +62,30 @@ export function CartSidebar({ isOpen, onClose, items, onRemove, onClearAll }: Ca
                   <div className="flex-1">
                     <h3 className="font-semibold text-foreground line-clamp-2">{item.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1">${item.price.toFixed(2)}</p>
+                    
+                    {/* Quantity Controls */}
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-sm text-muted-foreground">Qty:</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => onUpdateQuantity(item.id, item.quantity > 1 ? item.quantity - 1 : 1)}
+                          className="w-6 h-6 flex items-center justify-center bg-background border border-border rounded hover:bg-muted transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={item.quantity <= 1}
+                        >
+                          -
+                        </button>
+                        <span className="w-8 text-center text-sm font-medium text-foreground">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                          className="w-6 h-6 flex items-center justify-center bg-background border border-border rounded hover:bg-muted transition-colors text-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    
                     <p className="text-sm font-semibold text-primary mt-2">
                       ${(item.price * item.quantity).toFixed(2)}
                     </p>
@@ -84,7 +110,10 @@ export function CartSidebar({ isOpen, onClose, items, onRemove, onClearAll }: Ca
                 <span>Total:</span>
                 <span className="text-primary">${total.toFixed(2)}</span>
               </div>
-              <button className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity">
+              <button 
+                onClick={onCheckout}
+                className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
+              >
                 Proceed to Checkout
               </button>
               <button

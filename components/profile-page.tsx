@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Building2, User, Phone, Mail, Edit2, Check, X } from "lucide-react"
 
 interface UserData {
@@ -22,8 +22,65 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState(userData)
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(true)
 
-  const handleSave = () => {
+  // Fetch user data from API
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('authToken')
+        if (!token) {
+          setError('No authentication token found')
+          setLoading(false)
+          return
+        }
+
+        console.log('Fetching user data with token:', token)
+        
+        const response = await fetch('http://localhost:5001/api/v1/auth/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        
+        const data = await response.json()
+        console.log('User data response:', data)
+        console.log('User data keys:', Object.keys(data))
+        console.log('data.user:', data.user)
+        
+        if (response.ok) {
+          // Map API response to form data structure
+          const apiData = data.data || data.user || data
+          console.log('API Data to map:', apiData)
+          
+          const mappedData = {
+            username: apiData.username || apiData.name || '',
+            email: apiData.email || '',
+            companyName: apiData.companyName || apiData.company_name || apiData.company || '',
+            contactPerson: apiData.contactPerson || apiData.contact_person || apiData.contactName || '',
+            phone: apiData.phone || apiData.phoneNumber || apiData.phone_number || '',
+            category: apiData.role || apiData.category || 'Customer'
+          }
+          
+          console.log('Mapped form data:', mappedData)
+          setFormData(mappedData)
+        } else {
+          setError(data.message || 'Failed to fetch user data')
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+        setError('Network error. Please try again.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUserData()
+  }, [])
+
+  const handleSave = async () => {
     setError("")
 
     if (!formData.companyName || !formData.contactPerson || !formData.email || !formData.phone) {
@@ -41,8 +98,42 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
       return
     }
 
-    onUpdate(formData)
-    setIsEditing(false)
+    try {
+      const token = localStorage.getItem('authToken')
+      if (!token) {
+        setError('No authentication token found')
+        return
+      }
+
+      console.log('Updating profile with data:', formData)
+      
+      const response = await fetch('http://localhost:5001/api/v1/auth/updateprofile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          companyName: formData.companyName,
+          contactPerson: formData.contactPerson,
+          phone: formData.phone
+        })
+      })
+      
+      const data = await response.json()
+      console.log('Profile update response:', data)
+      
+      if (response.ok) {
+        alert('Profile updated successfully!')
+        onUpdate(formData)
+        setIsEditing(false)
+      } else {
+        setError(data.message || 'Failed to update profile')
+      }
+    } catch (error) {
+      console.error('Profile update error:', error)
+      setError('Network error. Please try again.')
+    }
   }
 
   return (
@@ -54,8 +145,24 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
           <p className="text-muted-foreground">Manage your account information</p>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="bg-card border border-border rounded-2xl shadow-lg p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading profile data...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 mb-6">
+            <p className="text-destructive font-medium">{error}</p>
+          </div>
+        )}
+
         {/* Profile Card */}
-        <div className="bg-card border border-border rounded-2xl shadow-lg p-8">
+        {!loading && !error && (
+          <div className="bg-card border border-border rounded-2xl shadow-lg p-8">
           {/* User Info Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
@@ -192,6 +299,7 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   )

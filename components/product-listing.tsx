@@ -1,117 +1,99 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { Filter } from "lucide-react"
-import { ProductCard } from "./product-card"
+import { useState, useEffect, useMemo } from "react"
+import { Filter, ShoppingCart } from "lucide-react"
 
-const PRODUCTS = [
-  {
-    id: "1",
-    name: "Intel Core i9-14900K",
-    category: "Processors",
-    price: 689,
-    rating: 4.9,
-    reviews: 342,
-    image: "/intel-processor.jpg",
-    specs: "24 Cores, 5.8GHz Turbo",
-  },
-  {
-    id: "2",
-    name: "AMD Ryzen 9 7950X",
-    category: "Processors",
-    price: 549,
-    rating: 4.8,
-    reviews: 298,
-    image: "/amd-processor.jpg",
-    specs: "16 Cores, 5.7GHz Turbo",
-  },
-  {
-    id: "3",
-    name: "NVIDIA RTX 4090",
-    category: "Graphics Cards",
-    price: 1999,
-    rating: 4.9,
-    reviews: 567,
-    image: "/graphics-card.jpg",
-    specs: "24GB GDDR6X Memory",
-  },
-  {
-    id: "4",
-    name: "Corsair Vengeance 64GB DDR5",
-    category: "Memory",
-    price: 299,
-    rating: 4.7,
-    reviews: 189,
-    image: "/ram-memory.jpg",
-    specs: "6000MHz, RGB Lighting",
-  },
-  {
-    id: "5",
-    name: "Samsung 990 Pro 4TB NVMe",
-    category: "Storage",
-    price: 399,
-    rating: 4.8,
-    reviews: 421,
-    image: "/ssd-storage.jpg",
-    specs: "7450MB/s Read Speed",
-  },
-  {
-    id: "6",
-    name: "Crucial P5 Plus 2TB SSD",
-    category: "Storage",
-    price: 169,
-    rating: 4.6,
-    reviews: 234,
-    image: "/ssd-crucial.jpg",
-    specs: "6600MB/s Read Speed",
-  },
-  {
-    id: "7",
-    name: "EVGA SuperNOVA 1000W PSU",
-    category: "Power Supply",
-    price: 189,
-    rating: 4.8,
-    reviews: 342,
-    image: "/power-supply.jpg",
-    specs: "80 PLUS Gold Certified",
-  },
-  {
-    id: "8",
-    name: "Noctua NH-D15 CPU Cooler",
-    category: "Cooling",
-    price: 99,
-    rating: 4.9,
-    reviews: 567,
-    image: "/cpu-cooler.jpg",
-    specs: "LGA1700 Compatible",
-  },
-]
+interface Product {
+  _id: string
+  name: string
+  category: string
+  price: number
+  quantity: number
+}
 
 interface ProductListingProps {
   onAddToCart: (product: { id: string; name: string; price: number }) => void
 }
 
 export function ProductListing({ onAddToCart }: ProductListingProps) {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState("featured")
   const [filterOpen, setFilterOpen] = useState(false)
 
-  const categories = useMemo(() => Array.from(new Set(PRODUCTS.map((p) => p.category))), [])
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch(`http://localhost:5001/api/v1/products?page=${currentPage}&limit=10`)
+        
+        if (!response.ok) {
+          if (response.status === 429) {
+            // Rate limited, wait and retry once
+            console.log('Rate limited, waiting 2 seconds...')
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            const retryResponse = await fetch(`http://localhost:5001/api/v1/products?page=${currentPage}&limit=10`)
+            if (retryResponse.ok) {
+              const data = await retryResponse.json()
+              setProducts(data.products || data.data || [])
+              setTotalPages(data.totalPages || Math.ceil((data.total || data.count) / 10))
+            } else {
+              throw new Error('Still rate limited after retry')
+            }
+          } else {
+            throw new Error(`HTTP ${response.status}`)
+          }
+        } else {
+          const data = await response.json()
+          setProducts(data.products || data.data || [])
+          setTotalPages(data.totalPages || Math.ceil((data.total || data.count) / 10))
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error)
+        if (error.message.includes('429') || error.message.includes('Too many requests')) {
+          setError('Too many requests. Please wait a moment...')
+        } else {
+          setError('Failed to fetch products')
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
 
+    fetchProducts()
+  }, [currentPage])
+
+  // Get unique categories from products
+  const categories = [...new Set(products.map(product => product.category))]
+
+  // Filter products by category
   const filteredProducts = useMemo(() => {
-    const products = selectedCategory ? PRODUCTS.filter((p) => p.category === selectedCategory) : PRODUCTS
+    const filtered = selectedCategory 
+      ? products.filter(product => product.category === selectedCategory)
+      : products
 
     switch (sortBy) {
       case "price-low":
-        return products.sort((a, b) => a.price - b.price)
+        return filtered.sort((a: Product, b: Product) => a.price - b.price)
       case "price-high":
-        return products.sort((a, b) => b.price - a.price)
-      case "rating":
-        return products.sort((a, b) => b.rating - a.rating)
+        return filtered.sort((a: Product, b: Product) => b.price - a.price)
       default:
-        return products
+        return filtered
     }
-  }, [selectedCategory, sortBy])
+  }, [products, selectedCategory, sortBy])
+
+  const handleAddToCart = (product: Product) => {
+    onAddToCart({
+      id: product._id,
+      name: product.name,
+      price: product.price
+    })
+  }
 
   return (
     <div className="bg-background">
@@ -202,11 +184,76 @@ export function ProductListing({ onAddToCart }: ProductListingProps) {
               </p>
             </div>
 
-            {/* Products Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} onAddToCart={() => onAddToCart(product)} />
-              ))}
+            {/* Products Table */}
+            <div className="bg-card border border-border rounded-lg overflow-hidden">
+              {loading ? (
+                <div className="p-8 text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Loading products...</p>
+                </div>
+              ) : error ? (
+                <div className="p-8 text-center">
+                  <p className="text-destructive">{error}</p>
+                </div>
+              ) : (
+                <>
+                  <table className="w-full">
+                    <thead className="bg-muted">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-foreground">Name</th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-foreground">Category</th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-foreground">Price</th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-foreground">Quantity</th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-foreground">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {filteredProducts.map((product) => (
+                        <tr key={product._id} className="hover:bg-muted/50">
+                          <td className="px-6 py-4 text-sm text-foreground">{product.name}</td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">{product.category}</td>
+                          <td className="px-6 py-4 text-sm font-medium text-foreground">${product.price}</td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">{product.quantity}</td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => handleAddToCart(product)}
+                              className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+                            >
+                              <ShoppingCart size={16} />
+                              Add to Cart
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="px-6 py-4 bg-muted border-t border-border flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">
+                        Page {currentPage} of {totalPages}
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                          disabled={currentPage === 1}
+                          className="px-3 py-1 text-sm bg-background border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                          disabled={currentPage === totalPages}
+                          className="px-3 py-1 text-sm bg-background border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

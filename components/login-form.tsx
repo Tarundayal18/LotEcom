@@ -11,9 +11,9 @@ interface LoginFormProps {
 export function LoginForm({ onLogin }: LoginFormProps) {
   const [isSignUp, setIsSignUp] = useState(false)
   const [isForgotPassword, setIsForgotPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("")
   const [companyName, setCompanyName] = useState("")
   const [contactPerson, setContactPerson] = useState("")
   const [phone, setPhone] = useState("")
@@ -33,81 +33,152 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     "Other",
   ]
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
     if (isForgotPassword) {
-      if (!email || !currentPassword || !newPassword) {
-        setError("Please fill in all fields")
+      if (!username || !currentPassword || !newPassword) {
+        alert("Please fill in all fields")
         return
       }
       if (newPassword.length < 6) {
-        setError("New password must be at least 6 characters")
+        alert("New password must be at least 6 characters")
         return
       }
-      setError("")
-      alert("Password updated successfully!")
-      setIsForgotPassword(false)
-      setEmail("")
-      setCurrentPassword("")
-      setNewPassword("")
+      
+      try {
+        const response = await fetch('http://localhost:5001/api/v1/auth/forgot-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username,
+            currentPassword,
+            newPassword
+          })
+        })
+        
+        const data = await response.json()
+        
+        if (response.ok) {
+          alert("Password updated successfully!")
+          setIsForgotPassword(false)
+          setUsername("")
+          setCurrentPassword("")
+          setNewPassword("")
+        } else {
+          alert(data.message || "Failed to update password")
+        }
+      } catch (error) {
+        alert("Network error. Please try again.")
+      }
       return
     }
 
     if (isSignUp) {
-      if (!email || !password || !username || !companyName || !contactPerson || !phone || !category) {
-        setError("Please fill in all fields")
+      if (!email || !password || !username || !companyName || !contactPerson || !phone) {
+        alert("Please fill in all fields")
         return
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setError("Please enter a valid email")
+        alert("Please enter a valid email")
         return
       }
       if (password.length < 6) {
-        setError("Password must be at least 6 characters")
+        alert("Password must be at least 6 characters")
         return
       }
       if (!/^\d{10}$/.test(phone.replace(/\D/g, ""))) {
-        setError("Please enter a valid phone number")
+        alert("Please enter a valid phone number")
         return
       }
 
-      onLogin({
-        email,
-        username,
-        companyName,
-        contactPerson,
-        phone,
-        category,
-      })
-      setEmail("")
-      setPassword("")
-      setUsername("")
-      setCompanyName("")
-      setContactPerson("")
-      setPhone("")
-      setCategory("")
+      try {
+        const response = await fetch('http://localhost:5001/api/v1/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            username,
+            companyName,
+            contactPerson,
+            phone
+          })
+        })
+        
+        const data = await response.json()
+        
+        if (response.ok) {
+          alert("Registration successful! Please wait for admin approval before logging in.")
+          setIsSignUp(false)
+          setEmail("")
+          setPassword("")
+          setUsername("")
+          setCompanyName("")
+          setContactPerson("")
+          setPhone("")
+        } else {
+          alert(data.message || "Registration failed")
+        }
+      } catch (error) {
+        alert("Network error. Please try again.")
+      }
       return
     }
 
     // Login
-    if (!email || !password) {
-      setError("Please fill in all fields")
+    if (!username || !password) {
+      alert("Please fill in all fields")
       return
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email")
-      return
+    
+    const requestData = {
+      username,
+      password
     }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters")
-      return
+    
+    console.log("Login Request Data:", requestData)
+    
+    try {
+      const response = await fetch('http://localhost:5001/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      })
+      
+      const data = await response.json()
+      console.log("Login Response Data:", data)
+      console.log("Response Status:", response.status)
+      
+      if (response.ok) {
+        // Store token in localStorage
+        if (data.token) {
+          localStorage.setItem('authToken', data.token)
+          console.log("Token stored in localStorage:", data.token)
+        }
+        
+        // If token exists, login regardless of approval status
+        if (data.token) {
+          onLogin(data)
+          setUsername("")
+          setPassword("")
+        } else {
+          alert("Your account is pending admin approval. Please wait for approval before logging in.")
+        }
+      } else {
+        alert(data.message || "Login failed")
+      }
+    } catch (error) {
+      console.error("Login Error:", error)
+      alert("Network error. Please try again.")
     }
-
-    onLogin({ email })
-    setEmail("")
-    setPassword("")
   }
 
   return (
@@ -273,7 +344,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                 </div>
 
                 {/* Category Dropdown */}
-                <div>
+                {/* <div>
                   <label htmlFor="category" className="block text-sm font-medium text-foreground mb-2">
                     Business Category
                   </label>
@@ -297,7 +368,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       size={20}
                     />
                   </div>
-                </div>
+                </div> */}
               </>
             )}
 
@@ -305,17 +376,17 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             {isForgotPassword && (
               <>
                 <div>
-                  <label htmlFor="email-forgot" className="block text-sm font-medium text-foreground mb-2">
-                    Email Address
+                  <label htmlFor="username-forgot" className="block text-sm font-medium text-foreground mb-2">
+                    Username
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 text-muted-foreground" size={20} />
+                    <User className="absolute left-3 top-3 text-muted-foreground" size={20} />
                     <input
-                      id="email-forgot"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your@email.com"
+                      id="username-forgot"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="your_username"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -361,17 +432,17 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             {!isSignUp && !isForgotPassword && (
               <>
                 <div>
-                  <label htmlFor="email-login" className="block text-sm font-medium text-foreground mb-2">
-                    Email Address
+                  <label htmlFor="username-login" className="block text-sm font-medium text-foreground mb-2">
+                    Username
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 text-muted-foreground" size={20} />
+                    <User className="absolute left-3 top-3 text-muted-foreground" size={20} />
                     <input
-                      id="email-login"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@company.com"
+                      id="username-login"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="your_username"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -426,7 +497,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               <p className="text-xs text-muted-foreground text-center mb-3">Demo credentials:</p>
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>
-                  Email: <span className="text-foreground font-mono">demo@example.com</span>
+                  Username: <span className="text-foreground font-mono">demo_user</span>
                 </p>
                 <p>
                   Password: <span className="text-foreground font-mono">demo123456</span>
