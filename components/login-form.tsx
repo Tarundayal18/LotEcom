@@ -48,7 +48,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       }
       
       try {
-        const response = await fetch('http://localhost:5001/api/v1/auth/forgot-password', {
+        const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/forgot-password', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       }
 
       try {
-        const response = await fetch('http://localhost:5001/api/v1/auth/register', {
+        const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     console.log("Login Request Data:", requestData)
     
     try {
-      const response = await fetch('http://localhost:5001/api/v1/auth/login', {
+      const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
