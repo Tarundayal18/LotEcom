@@ -16,6 +16,8 @@ export default function Home() {
   const [userData, setUserData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [quantityUpdateTimeout, setQuantityUpdateTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const [isCheckingOut, setIsCheckingOut] = useState(false)
 
   // Check for existing token on page load
   useEffect(() => {
@@ -171,6 +173,7 @@ export default function Home() {
         return
       }
 
+      setIsAddingToCart(true)
       console.log('Adding to cart:', product)
       
       const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/cart', {
@@ -198,6 +201,8 @@ export default function Home() {
     } catch (error) {
       console.error('Add to cart error:', error)
       alert('Network error. Please try again.')
+    } finally {
+      setIsAddingToCart(false)
     }
   }
 
@@ -276,8 +281,7 @@ export default function Home() {
           if (response.ok) {
             const data = await response.json()
             console.log('Update quantity response:', data)
-            // Refresh cart data from API to get the updated state
-            fetchCartData() // Don't await, let it run in background
+            // Don't refresh cart data - trust the UI update
           } else {
             // PUT API not available, use fallback silently
             throw new Error('PUT API not available')
@@ -311,19 +315,18 @@ export default function Home() {
             console.log('Add item with new quantity response:', data)
             
             if (response.ok) {
-              // Refresh cart data from API to get the updated state
-              fetchCartData() // Don't await, let it run in background
+              // Don't refresh cart data - trust the UI update
             }
           } catch (fallbackError) {
             console.error('Fallback approach failed:', fallbackError)
-            // Revert UI change if API fails
-            fetchCartData()
+            // Revert UI change if API fails - but don't interfere with checkout
+            // fetchCartData() // Commented out to prevent checkout interference
           }
         }
       } catch (error) {
         console.error('Update quantity error:', error)
-        // Revert UI change on error
-        fetchCartData()
+        // Revert UI change on error - but don't interfere with checkout
+        // fetchCartData() // Commented out to prevent checkout interference
       }
     }, 500) // 500ms debounce delay
 
@@ -343,7 +346,27 @@ export default function Home() {
         return
       }
 
-      console.log('Creating checkout estimate...')
+      setIsCheckingOut(true)
+
+      // Fetch fresh cart data before checkout to get latest quantities
+      console.log('Fetching fresh cart data before checkout...')
+      try {
+        await fetchCartData()
+        // Wait a bit to ensure state is updated
+        await new Promise(resolve => setTimeout(resolve, 100))
+      } catch (error) {
+        console.log('Could not fetch fresh cart data, using current state')
+      }
+
+      // Get the updated cart items
+      const currentCartItems = cartItems
+      if (currentCartItems.length === 0) {
+        alert('Your cart is empty')
+        setIsCheckingOut(false)
+        return
+      }
+
+      console.log('Creating checkout estimate with items:', currentCartItems)
       
       const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/estimate/create', {
         method: 'POST',
@@ -352,7 +375,7 @@ export default function Home() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          items: cartItems.map(item => ({
+          items: currentCartItems.map(item => ({
             productId: item.id,
             quantity: item.quantity,
             price: item.price
@@ -366,16 +389,38 @@ export default function Home() {
       if (response.ok) {
         alert('Order placed successfully! Estimate created.')
         setCartOpen(false)
-        // Refresh cart data after successful checkout
-        await fetchCartData()
-        // Optionally clear cart after successful checkout
-        // setCartItems([])
+        
+        // Clear cart after successful checkout
+        try {
+          const clearResponse = await fetch('https://lot-ecom-backend.onrender.com/api/v1/cart', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          })
+          
+          if (clearResponse.ok) {
+            console.log('Cart cleared successfully after checkout')
+            setCartItems([]) // Clear local state immediately
+          } else {
+            console.log('Failed to clear cart after checkout, but order was placed')
+            // Still clear local state since order was successful
+            setCartItems([])
+          }
+        } catch (clearError) {
+          console.error('Error clearing cart after checkout:', clearError)
+          // Still clear local state since order was successful
+          setCartItems([])
+        }
       } else {
         alert(data.message || 'Failed to create estimate')
       }
     } catch (error) {
       console.error('Checkout error:', error)
       alert('Network error. Please try again.')
+    } finally {
+      setIsCheckingOut(false)
     }
   }
 
@@ -423,7 +468,20 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col relative">
+      {/* Global Loading Overlay */}
+      {(isAddingToCart || isCheckingOut) && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-card border border-border rounded-lg p-6 shadow-xl">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              <span className="text-foreground font-medium">
+                {isAddingToCart ? 'Adding to cart...' : 'Processing checkout...'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-card shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -524,7 +582,7 @@ export default function Home() {
         ) : currentPage === "profile" ? (
           <ProfilePage userData={userData} onUpdate={handleUpdateProfile} onBack={() => setCurrentPage("products")} />
         ) : (
-          <ProductListing onAddToCart={handleAddToCart} />
+          <ProductListing onAddToCart={handleAddToCart} isAddingToCart={isAddingToCart} />
         )}
       </main>
 
@@ -537,6 +595,7 @@ export default function Home() {
         onUpdateQuantity={handleUpdateQuantity}
         onClearAll={handleClearAllCart}
         onCheckout={handleCheckout}
+        isCheckingOut={isCheckingOut}
       />
 
       {/* Footer */}

@@ -13,9 +13,10 @@ interface Product {
 
 interface ProductListingProps {
   onAddToCart: (product: { id: string; name: string; price: number }) => void
+  isAddingToCart?: boolean
 }
 
-export function ProductListing({ onAddToCart }: ProductListingProps) {
+export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductListingProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -217,10 +218,20 @@ export function ProductListing({ onAddToCart }: ProductListingProps) {
                           <td className="px-6 py-4">
                             <button
                               onClick={() => handleAddToCart(product)}
-                              className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+                              disabled={isAddingToCart}
+                              className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <ShoppingCart size={16} />
-                              Add to Cart
+                              {isAddingToCart ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                                  Adding...
+                                </>
+                              ) : (
+                                <>
+                                  <ShoppingCart size={16} />
+                                  Add to Cart
+                                </>
+                              )}
                             </button>
                           </td>
                         </tr>

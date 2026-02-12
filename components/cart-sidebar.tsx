@@ -17,9 +17,10 @@ interface CartSidebarProps {
   onUpdateQuantity: (productId: string, quantity: number) => void
   onClearAll: () => void
   onCheckout: () => void
+  isCheckingOut?: boolean
 }
 
-export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity, onClearAll, onCheckout }: CartSidebarProps) {
+export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity, onClearAll, onCheckout, isCheckingOut = false }: CartSidebarProps) {
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   return (
@@ -112,9 +113,17 @@ export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity
               </div>
               <button 
                 onClick={onCheckout}
-                className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
+                disabled={isCheckingOut}
+                className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Proceed to Checkout
+                {isCheckingOut ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+                    Processing...
+                  </>
+                ) : (
+                  'Proceed to Checkout'
+                )}
               </button>
               <button
                 onClick={onClearAll}
