@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { Mail, Lock, User, Building2, Phone, Tag, ArrowRight, ChevronDown } from "lucide-react"
+import { AlertPopup } from "./alert-popup"
 
 interface LoginFormProps {
   onLogin: (userData: any) => void
@@ -21,6 +22,12 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [error, setError] = useState("")
+  const [alertPopup, setAlertPopup] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info" as "error" | "success" | "info"
+  })
 
   const categories = [
     "Manufacturing",
@@ -33,17 +40,38 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     "Other",
   ]
 
+  const showAlert = (title: string, message: string, type: "error" | "success" | "info" = "info") => {
+    setAlertPopup({ isOpen: true, title, message, type })
+  }
+
+  const closeAlert = () => {
+    setAlertPopup(prev => ({ ...prev, isOpen: false }))
+  }
+
+  const clearAllFields = () => {
+    setUsername("")
+    setPassword("")
+    setEmail("")
+    setCompanyName("")
+    setContactPerson("")
+    setPhone("")
+    setCategory("")
+    setCurrentPassword("")
+    setNewPassword("")
+    setError("")
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
     if (isForgotPassword) {
       if (!username || !currentPassword || !newPassword) {
-        alert("Please fill in all fields")
+        showAlert("Validation Error", "Please fill in all fields", "error")
         return
       }
       if (newPassword.length < 6) {
-        alert("New password must be at least 6 characters")
+        showAlert("Validation Error", "New password must be at least 6 characters", "error")
         return
       }
       
@@ -63,35 +91,41 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         const data = await response.json()
         
         if (response.ok) {
-          alert("Password updated successfully!")
+          showAlert("Success", "Password updated successfully!", "success")
           setIsForgotPassword(false)
-          setUsername("")
-          setCurrentPassword("")
-          setNewPassword("")
+          clearAllFields()
         } else {
-          alert(data.message || "Failed to update password")
+          showAlert("Error", data.message || "Failed to update password", "error")
         }
       } catch (error) {
-        alert("Network error. Please try again.")
+        showAlert("Network Error", "Unable to connect to server. Please check your internet connection.", "error")
       }
       return
     }
 
     if (isSignUp) {
-      if (!email || !password || !username || !companyName || !contactPerson || !phone) {
-        alert("Please fill in all fields")
+      const emptyFields = []
+      if (!email) emptyFields.push("Email")
+      if (!password) emptyFields.push("Password")
+      if (!username) emptyFields.push("Username")
+      if (!companyName) emptyFields.push("Company Name")
+      if (!contactPerson) emptyFields.push("Contact Person")
+      if (!phone) emptyFields.push("Phone Number")
+      
+      if (emptyFields.length > 0) {
+        showAlert("Validation Error", `Please fill in the following fields: ${emptyFields.join(", ")}`, "error")
         return
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        alert("Please enter a valid email")
+        showAlert("Validation Error", "Please enter a valid email address", "error")
         return
       }
       if (password.length < 6) {
-        alert("Password must be at least 6 characters")
+        showAlert("Validation Error", "Password must be at least 6 characters long", "error")
         return
       }
       if (!/^\d{10}$/.test(phone.replace(/\D/g, ""))) {
-        alert("Please enter a valid phone number")
+        showAlert("Validation Error", "Please enter a valid 10-digit phone number", "error")
         return
       }
 
@@ -114,26 +148,21 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         const data = await response.json()
         
         if (response.ok) {
-          alert("Registration successful! Please wait for admin approval before logging in.")
+          showAlert("Registration Successful", "Your account has been created! Please wait for admin approval before logging in.", "success")
           setIsSignUp(false)
-          setEmail("")
-          setPassword("")
-          setUsername("")
-          setCompanyName("")
-          setContactPerson("")
-          setPhone("")
+          clearAllFields()
         } else {
-          alert(data.message || "Registration failed")
+          showAlert("Registration Failed", data.message || "Unable to create account. Please try again.", "error")
         }
       } catch (error) {
-        alert("Network error. Please try again.")
+        showAlert("Network Error", "Unable to connect to server. Please check your internet connection.", "error")
       }
       return
     }
 
     // Login
     if (!username || !password) {
-      alert("Please fill in all fields")
+      showAlert("Validation Error", "Please enter both username and password", "error")
       return
     }
     
@@ -167,17 +196,16 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         // If token exists, login regardless of approval status
         if (data.token) {
           onLogin(data)
-          setUsername("")
-          setPassword("")
+          clearAllFields()
         } else {
-          alert("Your account is pending admin approval. Please wait for approval before logging in.")
+          showAlert("Account Pending", "Your account is pending admin approval. Please wait for approval before logging in.", "info")
         }
       } else {
-        alert(data.message || "Login failed")
+        showAlert("Login Failed", data.message || "Invalid username or password", "error")
       }
     } catch (error) {
       console.error("Login Error:", error)
-      alert("Network error. Please try again.")
+      showAlert("Network Error", "Unable to connect to server. Please check your internet connection.", "error")
     }
   }
 
@@ -201,7 +229,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           {!isForgotPassword && (
             <div className="flex gap-2 mb-8 bg-muted rounded-lg p-1">
               <button
-                onClick={() => setIsSignUp(false)}
+                onClick={() => {
+                  setIsSignUp(false)
+                  clearAllFields()
+                }}
                 className={`flex-1 py-2 rounded-md font-medium transition-colors ${
                   !isSignUp ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
@@ -209,7 +240,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                 Login
               </button>
               <button
-                onClick={() => setIsSignUp(true)}
+                onClick={() => {
+                  setIsSignUp(true)
+                  clearAllFields()
+                }}
                 className={`flex-1 py-2 rounded-md font-medium transition-colors ${
                   isSignUp ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
@@ -222,7 +256,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           {isForgotPassword && (
             <div className="mb-8">
               <button
-                onClick={() => setIsForgotPassword(false)}
+                onClick={() => {
+                  setIsForgotPassword(false)
+                  clearAllFields()
+                }}
                 className="text-sm text-primary hover:underline font-medium"
               >
                 ← Back to Login
@@ -247,7 +284,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder="john_doe"
+                      placeholder="Username"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -265,7 +302,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="company@email.com"
+                      placeholder="Email Address"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -283,7 +320,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
+                      placeholder="Password"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -301,7 +338,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       type="text"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder="Tech Solutions Inc"
+                      placeholder="Company Name"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -319,7 +356,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       type="text"
                       value={contactPerson}
                       onChange={(e) => setContactPerson(e.target.value)}
-                      placeholder="John Smith"
+                      placeholder="Contact Person Name"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -336,8 +373,9 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       id="phone"
                       type="tel"
                       value={phone}
+                      maxLength={10}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+1 (555) 123-4567"
+                      placeholder="Phone Number"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -386,7 +424,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder="your_username"
+                      placeholder="Username"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -403,7 +441,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       type="password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      placeholder="••••••••"
+                      placeholder="Current Password"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -420,7 +458,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="••••••••"
+                      placeholder="New Password"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -442,7 +480,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder="your_username"
+                      placeholder="Username"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -459,7 +497,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
+                      placeholder="Password"
                       className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
@@ -467,7 +505,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
 
                 <button
                   type="button"
-                  onClick={() => setIsForgotPassword(true)}
+                  onClick={() => {
+                    setIsForgotPassword(true)
+                    clearAllFields()
+                  }}
                   className="text-sm text-primary hover:underline font-medium"
                 >
                   Forgot password?
@@ -507,6 +548,15 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           )}
         </div>
       </div>
+      
+      {/* Alert Popup */}
+      <AlertPopup
+        isOpen={alertPopup.isOpen}
+        onClose={closeAlert}
+        title={alertPopup.title}
+        message={alertPopup.message}
+        type={alertPopup.type}
+      />
     </div>
   )
 }

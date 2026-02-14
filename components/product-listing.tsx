@@ -1,14 +1,24 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Filter, ShoppingCart } from "lucide-react"
+import { Filter } from "lucide-react"
+import { ProductCard } from "./product-card"
 
 interface Product {
   _id: string
   name: string
   category: string
   price: number
+  originalPrice?: number
+  discountPercentage?: number
+  rating?: number
+  numberOfReviews?: number
+  mainImage?: {
+    public_id: string
+    url: string
+  }
   quantity: number
+  isActive: boolean
 }
 
 interface ProductListingProps {
@@ -56,7 +66,8 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
         }
       } catch (error) {
         console.error('Error fetching products:', error)
-        if (error.message.includes('429') || error.message.includes('Too many requests')) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        if (errorMessage.includes('429') || errorMessage.includes('Too many requests')) {
           setError('Too many requests. Please wait a moment...')
         } else {
           setError('Failed to fetch products')
@@ -185,63 +196,49 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
               </p>
             </div>
 
-            {/* Products Table */}
-            <div className="bg-card border border-border rounded-lg overflow-hidden">
+            {/* Products Grid */}
+            <div className="bg-card border border-border rounded-lg p-6">
               {loading ? (
-                <div className="p-8 text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">Loading products...</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="bg-gray-200 h-64 rounded-lg mb-4"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                  ))}
                 </div>
               ) : error ? (
-                <div className="p-8 text-center">
+                <div className="text-center py-12">
                   <p className="text-destructive">{error}</p>
                 </div>
               ) : (
                 <>
-                  <table className="w-full">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-foreground">Name</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-foreground">Category</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-foreground">Price</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-foreground">Quantity</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-foreground">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {filteredProducts.map((product) => (
-                        <tr key={product._id} className="hover:bg-muted/50">
-                          <td className="px-6 py-4 text-sm text-foreground">{product.name}</td>
-                          <td className="px-6 py-4 text-sm text-muted-foreground">{product.category}</td>
-                          <td className="px-6 py-4 text-sm font-medium text-foreground">${product.price}</td>
-                          <td className="px-6 py-4 text-sm text-muted-foreground">{product.quantity}</td>
-                          <td className="px-6 py-4">
-                            <button
-                              onClick={() => handleAddToCart(product)}
-                              disabled={isAddingToCart}
-                              className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {isAddingToCart ? (
-                                <>
-                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                                  Adding...
-                                </>
-                              ) : (
-                                <>
-                                  <ShoppingCart size={16} />
-                                  Add to Cart
-                                </>
-                              )}
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredProducts.map((product) => (
+                      <ProductCard
+                        key={product._id}
+                        product={{
+                          id: product._id,
+                          name: product.name,
+                          category: product.category,
+                          price: product.price,
+                          originalPrice: product.originalPrice,
+                          discountPercentage: product.discountPercentage,
+                          rating: product.rating,
+                          numberOfReviews: product.numberOfReviews,
+                          mainImage: product.mainImage,
+                          quantity: product.quantity,
+                          isActive: product.isActive
+                        }}
+                        onAddToCart={() => handleAddToCart(product)}
+                      />
+                    ))}
+                  </div>
 
                   {/* Pagination */}
                   {totalPages > 1 && (
-                    <div className="px-6 py-4 bg-muted border-t border-border flex items-center justify-between">
+                    <div className="mt-8 flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">
                         Page {currentPage} of {totalPages}
                       </p>
