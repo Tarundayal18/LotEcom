@@ -488,7 +488,7 @@ export default function Home() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-lg">
+              <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-lg glow-primary animate-float">
                 ⚡
               </div>
               <span className="text-xl font-bold text-foreground hidden sm:block">TechHub</span>
@@ -522,21 +522,21 @@ export default function Home() {
                 <>
                   <button
                     onClick={() => setCurrentPage("profile")}
-                    className={`p-2 rounded-lg transition-colors ${
+                    className={`p-2 rounded-xl transition-all duration-300 ${
                       currentPage === "profile"
-                        ? "bg-primary text-primary-foreground"
-                        : "text-foreground hover:bg-muted"
+                        ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground glow-primary"
+                        : "text-foreground hover:bg-muted hover:scale-110"
                     }`}
                   >
                     <User size={24} />
                   </button>
                   <button
                     onClick={() => setCartOpen(!cartOpen)}
-                    className="relative p-2 text-foreground hover:bg-muted rounded-lg transition-colors"
+                    className="relative p-2 text-foreground hover:bg-muted rounded-xl transition-all duration-300 hover:scale-110"
                   >
                     <ShoppingCart size={24} />
                     {cartItems.length > 0 && (
-                      <span className="absolute top-1 right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="absolute top-1 right-1 bg-gradient-to-r from-primary to-secondary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse-primary">
                         {cartItems.length}
                       </span>
                     )}
@@ -556,8 +556,8 @@ export default function Home() {
                     setUserData(null)
                   }
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                  isLoggedIn ? "bg-destructive/20 text-destructive hover:bg-destructive/30" : "hidden"
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                  isLoggedIn ? "bg-gradient-to-r from-destructive/80 to-destructive text-destructive-foreground hover:from-destructive hover:to-destructive/90 hover:scale-105" : "hidden"
                 }`}
               >
                 <LogOut size={20} />
@@ -573,7 +573,7 @@ export default function Home() {
         {loading ? (
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4 glow-primary"></div>
               <p className="text-muted-foreground">Checking authentication...</p>
             </div>
           </div>
@@ -604,20 +604,25 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <h3 className="font-bold text-lg text-foreground mb-4">TechHub</h3>
+                <h3 className="font-bold text-lg text-foreground mb-4 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm glow-primary animate-float">
+                    ⚡
+                  </div>
+                  TechHub
+                </h3>
                 <p className="text-muted-foreground text-sm">Your trusted B2B electronics supplier.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-foreground mb-4">Products</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>
-                    <button className="hover:text-primary transition-colors">Processors</button>
+                    <button className="hover:text-primary transition-colors duration-300 hover:translate-x-1 transform">Processors</button>
                   </li>
                   <li>
-                    <button className="hover:text-primary transition-colors">Memory</button>
+                    <button className="hover:text-primary transition-colors duration-300 hover:translate-x-1 transform">Memory</button>
                   </li>
                   <li>
-                    <button className="hover:text-primary transition-colors">Storage</button>
+                    <button className="hover:text-primary transition-colors duration-300 hover:translate-x-1 transform">Storage</button>
                   </li>
                 </ul>
               </div>
@@ -625,13 +630,13 @@ export default function Home() {
                 <h4 className="font-semibold text-foreground mb-4">Support</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>
-                    <button className="hover:text-primary transition-colors">Contact</button>
+                    <button className="hover:text-primary transition-colors duration-300 hover:translate-x-1 transform">Contact</button>
                   </li>
                   <li>
-                    <button className="hover:text-primary transition-colors">FAQ</button>
+                    <button className="hover:text-primary transition-colors duration-300 hover:translate-x-1 transform">FAQ</button>
                   </li>
                   <li>
-                    <button className="hover:text-primary transition-colors">Shipping Info</button>
+                    <button className="hover:text-primary transition-colors duration-300 hover:translate-x-1 transform">Shipping Info</button>
                   </li>
                 </ul>
               </div>

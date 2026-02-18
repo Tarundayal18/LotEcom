@@ -137,47 +137,47 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12">
       <div className="max-w-2xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">My Profile</h1>
-          <p className="text-muted-foreground">Manage your account information</p>
+          <h1 className="text-5xl font-bold text-foreground mb-4 animate-bounce-subtle">My Profile</h1>
+          <p className="text-xl text-muted-foreground">Manage your account information</p>
         </div>
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-card border border-border rounded-2xl shadow-lg p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="bg-gradient-to-br from-card to-secondary/5 border border-border rounded-2xl shadow-2xl p-8 text-center glow-secondary-hover transition-all duration-300">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4 glow-primary"></div>
             <p className="text-muted-foreground">Loading profile data...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && !loading && (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 mb-6">
+          <div className="bg-gradient-to-br from-destructive/10 to-destructive/5 border border-destructive/20 rounded-2xl p-6 mb-6 glow-primary-hover transition-all duration-300">
             <p className="text-destructive font-medium">{error}</p>
           </div>
         )}
 
         {/* Profile Card */}
         {!loading && !error && (
-          <div className="bg-card border border-border rounded-2xl shadow-lg p-8">
+          <div className="bg-gradient-to-br from-card to-secondary/5 border border-border rounded-2xl shadow-2xl p-8 glow-secondary-hover transition-all duration-300">
           {/* User Info Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <button
                 onClick={onBack}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors bg-muted text-foreground hover:bg-muted/80"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-gradient-to-r from-muted to-secondary/20 text-foreground hover:from-secondary/30 hover:to-secondary/40 transform hover:scale-[1.02]"
               >
                 ← Back
               </button>
               <button
                 onClick={() => setIsEditing(!isEditing)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                   isEditing
-                    ? "bg-destructive/20 text-destructive hover:bg-destructive/30"
-                    : "bg-primary text-primary-foreground hover:opacity-90"
+                    ? "bg-gradient-to-r from-destructive/80 to-destructive text-destructive-foreground hover:from-destructive hover:to-destructive/90 shine-effect"
+                    : "bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:from-primary/90 hover:to-secondary/90 shine-effect glow-primary-hover"
                 }`}
               >
                 {isEditing ? (
@@ -194,12 +194,12 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
               </button>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-2xl text-primary-foreground">
+              <div className="w-20 h-20 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-3xl text-primary-foreground glow-primary animate-float">
                 {formData.username ? formData.username.charAt(0).toUpperCase() : formData.email ? formData.email.charAt(0).toUpperCase() : 'U'}
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">{formData.username || formData.email || 'User'}</h2>
-                <p className="text-muted-foreground">{formData.category || 'Customer'}</p>
+                <h2 className="text-3xl font-bold text-foreground">{formData.username || formData.email || 'User'}</h2>
+                <p className="text-lg text-muted-foreground">{formData.category || 'Customer'}</p>
               </div>
             </div>
           </div>
@@ -222,7 +222,7 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
                   type="email"
                   value={formData.email}
                   readOnly
-                  className="w-full pl-10 pr-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder:text-muted-foreground cursor-not-allowed"
+                  className="w-full pl-10 pr-4 py-3 bg-gradient-to-r from-muted to-secondary/10 border border-border rounded-xl text-foreground placeholder:text-muted-foreground cursor-not-allowed transition-all duration-300"
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-2">Email cannot be changed</p>
@@ -238,10 +238,10 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
                   value={formData.companyName || ''}
                   onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                   readOnly={!isEditing}
-                  className={`w-full pl-10 pr-4 py-3 border border-border rounded-lg ${
+                  className={`w-full pl-10 pr-4 py-3 border border-border rounded-xl transition-all duration-300 ${
                     isEditing
-                      ? "bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      : "bg-muted text-foreground cursor-not-allowed"
+                      ? "bg-gradient-to-r from-background to-secondary/5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary hover:border-primary/50"
+                      : "bg-gradient-to-r from-muted to-secondary/10 text-foreground cursor-not-allowed"
                   }`}
                 />
               </div>
@@ -257,10 +257,10 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
                   value={formData.contactPerson || ''}
                   onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
                   readOnly={!isEditing}
-                  className={`w-full pl-10 pr-4 py-3 border border-border rounded-lg ${
+                  className={`w-full pl-10 pr-4 py-3 border border-border rounded-xl transition-all duration-300 ${
                     isEditing
-                      ? "bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      : "bg-muted text-foreground cursor-not-allowed"
+                      ? "bg-gradient-to-r from-background to-secondary/5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary hover:border-primary/50"
+                      : "bg-gradient-to-r from-muted to-secondary/10 text-foreground cursor-not-allowed"
                   }`}
                 />
               </div>
@@ -276,10 +276,10 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
                   value={formData.phone || ''}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   readOnly={!isEditing}
-                  className={`w-full pl-10 pr-4 py-3 border border-border rounded-lg ${
+                  className={`w-full pl-10 pr-4 py-3 border border-border rounded-xl transition-all duration-300 ${
                     isEditing
-                      ? "bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      : "bg-muted text-foreground cursor-not-allowed"
+                      ? "bg-gradient-to-r from-background to-secondary/5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary hover:border-primary/50"
+                      : "bg-gradient-to-r from-muted to-secondary/10 text-foreground cursor-not-allowed"
                   }`}
                 />
               </div>
@@ -291,9 +291,9 @@ export function ProfilePage({ userData, onUpdate, onBack }: ProfilePageProps) {
             <div className="flex gap-3 mt-8">
               <button
                 onClick={handleSave}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-xl font-semibold hover:from-primary/90 hover:to-secondary/90 transition-all duration-300 shine-effect glow-primary-hover transform hover:scale-[1.02] hover:-translate-y-0.5"
               >
-                <Check size={20} />
+                <Check size={20} className="animate-bounce-subtle" />
                 Save Changes
               </button>
             </div>

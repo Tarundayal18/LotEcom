@@ -110,10 +110,10 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
   return (
     <div className="bg-background">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border py-12 px-4 sm:px-6 lg:px-8">
+      <div className="bg-gradient-to-r from-primary via-secondary to-primary/20 animate-gradient border-b border-border py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-foreground mb-3 text-balance">Premium Electronics</h1>
-          <p className="text-lg text-muted-foreground text-balance">
+          <h1 className="text-5xl font-bold text-foreground mb-4 text-balance animate-bounce-subtle">Premium Electronics</h1>
+          <p className="text-xl text-muted-foreground text-balance">
             Browse our curated selection of enterprise-grade components and systems
           </p>
         </div>
@@ -123,22 +123,24 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar Filters */}
           <aside className={`${filterOpen ? "block" : "hidden"} lg:block lg:col-span-1`}>
-            <div className="bg-card border border-border rounded-lg p-6 sticky top-20">
+            <div className="bg-gradient-to-br from-card to-secondary/5 border border-border rounded-xl p-6 sticky top-20 glow-secondary-hover transition-all duration-300">
               <h2 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
-                <Filter size={20} />
+                <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center text-primary-foreground">
+                  <Filter size={16} />
+                </div>
                 Filters
               </h2>
 
               {/* Categories */}
               <div className="mb-8">
-                <h3 className="font-semibold text-foreground mb-4">Category</h3>
-                <div className="space-y-3">
+                <h3 className="font-semibold text-foreground mb-4 text-lg">Category</h3>
+                <div className="space-y-2">
                   <button
                     onClick={() => setSelectedCategory(null)}
-                    className={`block w-full text-left px-3 py-2 rounded-lg transition-colors font-medium ${
+                    className={`block w-full text-left px-4 py-3 rounded-xl transition-all duration-300 font-medium transform hover:scale-[1.02] ${
                       selectedCategory === null
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shine-effect glow-primary"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/20 hover:translate-x-1"
                     }`}
                   >
                     All Products
@@ -147,10 +149,10 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
                     <button
                       key={category}
                       onClick={() => setSelectedCategory(category)}
-                      className={`block w-full text-left px-3 py-2 rounded-lg transition-colors font-medium ${
+                      className={`block w-full text-left px-4 py-3 rounded-xl transition-all duration-300 font-medium transform hover:scale-[1.02] ${
                         selectedCategory === category
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                          ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shine-effect glow-primary"
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary/20 hover:translate-x-1"
                       }`}
                     >
                       {category}
@@ -161,11 +163,11 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
 
               {/* Sorting */}
               <div>
-                <h3 className="font-semibold text-foreground mb-4">Sort By</h3>
+                <h3 className="font-semibold text-foreground mb-4 text-lg">Sort By</h3>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 hover:border-primary/50"
                 >
                   <option value="featured">Featured</option>
                   <option value="price-low">Price: Low to High</option>
@@ -182,9 +184,9 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
             <div className="lg:hidden mb-6">
               <button
                 onClick={() => setFilterOpen(!filterOpen)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-xl font-semibold hover:from-primary/90 hover:to-secondary/90 transition-all duration-300 shine-effect glow-primary-hover transform hover:scale-[1.02]"
               >
-                <Filter size={20} />
+                <Filter size={20} className="animate-bounce-subtle" />
                 {filterOpen ? "Hide" : "Show"} Filters
               </button>
             </div>
@@ -197,7 +199,7 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
             </div>
 
             {/* Products Grid */}
-            <div className="bg-card border border-border rounded-lg p-6">
+            <div className="bg-gradient-to-br from-card to-secondary/5 border border-border rounded-xl p-6 glow-secondary-hover transition-all duration-300">
               {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[...Array(6)].map((_, i) => (
@@ -225,8 +227,6 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
                           price: product.price,
                           originalPrice: product.originalPrice,
                           discountPercentage: product.discountPercentage,
-                          rating: product.rating,
-                          numberOfReviews: product.numberOfReviews,
                           mainImage: product.mainImage,
                           quantity: product.quantity,
                           isActive: product.isActive
@@ -246,14 +246,14 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
                         <button
                           onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                           disabled={currentPage === 1}
-                          className="px-3 py-1 text-sm bg-background border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-4 py-2 text-sm bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-xl hover:from-primary/90 hover:to-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shine-effect glow-primary-hover transform hover:scale-[1.02] disabled:transform-none"
                         >
                           Previous
                         </button>
                         <button
                           onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                           disabled={currentPage === totalPages}
-                          className="px-3 py-1 text-sm bg-background border border-border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-4 py-2 text-sm bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-xl hover:from-primary/90 hover:to-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shine-effect glow-primary-hover transform hover:scale-[1.02] disabled:transform-none"
                         >
                           Next
                         </button>

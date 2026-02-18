@@ -41,26 +41,26 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
   return (
     <>
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 group">
+      <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 group hover:scale-[1.02] hover:-translate-y-1 glow-primary-hover">
         {/* Image Container */}
-        <div className="relative h-64 bg-gray-100 overflow-hidden cursor-pointer" onClick={openImageViewer}>
+        <div className="relative h-64 bg-muted overflow-hidden cursor-pointer" onClick={openImageViewer}>
           <img
             src={imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
           
           {/* Discount Badge */}
           {discountPercentage > 0 && (
-            <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded text-sm font-bold">
+            <div className="absolute top-3 left-3 bg-gradient-to-r from-primary to-secondary text-white px-3 py-1 rounded-full text-sm font-bold shine-effect">
               {discountPercentage}% OFF
             </div>
           )}
 
           {/* View Image Hint */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg">
-              <span className="text-sm font-medium text-gray-900">Click to view image</span>
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-500 flex items-center justify-center">
+            <div className="opacity-0 group-hover:opacity-100 transition-all duration-500 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg transform translate-y-2 group-hover:translate-y-0">
+              <span className="text-sm font-medium text-foreground">Click to view image</span>
             </div>
           </div>
         </div>
@@ -68,22 +68,22 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         {/* Content */}
         <div className="p-4">
           {/* Brand */}
-          <div className="text-sm text-gray-500 uppercase tracking-wide mb-1">
+          <div className="text-sm text-muted-foreground uppercase tracking-wide mb-2 font-medium">
             {product.category}
           </div>
           
           {/* Product Name */}
-          <h3 className="font-semibold text-lg text-gray-900 mb-4 line-clamp-2 min-h-[3.5rem]">
+          <h3 className="font-semibold text-lg text-foreground mb-4 line-clamp-2 min-h-[3.5rem] group-hover:text-primary transition-colors duration-300">
             {product.name}
           </h3>
 
           {/* Price */}
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl font-bold text-gray-900">
+            <span className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
               Rs. {product.price.toLocaleString('en-IN')}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-sm text-gray-500 line-through">
+              <span className="text-sm text-muted-foreground line-through">
                 Rs. {product.originalPrice.toLocaleString('en-IN')}
               </span>
             )}
@@ -92,9 +92,9 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           {/* Add to Cart Button */}
           <button
             onClick={onAddToCart}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 active:scale-95 transition-all"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-xl font-semibold hover:from-primary/90 hover:to-secondary/90 active:scale-95 transition-all duration-300 shine-effect glow-primary-hover transform hover:-translate-y-0.5"
           >
-            <ShoppingCart size={20} />
+            <ShoppingCart size={20} className="animate-bounce-subtle" />
             Add to Cart
           </button>
         </div>

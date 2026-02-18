@@ -210,21 +210,21 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-background flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/5 flex items-center justify-center px-4 py-12 animate-gradient">
       <div className="w-full max-w-md">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-6 mx-auto">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-2xl mb-6 mx-auto animate-float glow-primary">
             <span className="text-3xl">⚡</span>
           </div>
-          <h1 className="text-4xl font-bold text-foreground mb-3 text-balance">Welcome to TechHub</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-3 text-balance animate-bounce-subtle">Welcome to TechHub</h1>
           <p className="text-lg text-muted-foreground text-balance">
             Your B2B electronics partner for premium tech solutions
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-card border border-border rounded-2xl shadow-lg p-8 mb-6">
+        <div className="bg-card border border-border rounded-2xl shadow-2xl p-8 mb-6 glow-primary-hover transition-all duration-500 hover:scale-[1.02]">
           {/* Tabs */}
           {!isForgotPassword && (
             <div className="flex gap-2 mb-8 bg-muted rounded-lg p-1">
@@ -233,8 +233,8 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   setIsSignUp(false)
                   clearAllFields()
                 }}
-                className={`flex-1 py-2 rounded-md font-medium transition-colors ${
-                  !isSignUp ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                className={`flex-1 py-2 rounded-md font-medium transition-all duration-300 ${
+                  !isSignUp ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shine-effect" : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
                 }`}
               >
                 Login
@@ -244,8 +244,8 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   setIsSignUp(true)
                   clearAllFields()
                 }}
-                className={`flex-1 py-2 rounded-md font-medium transition-colors ${
-                  isSignUp ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                className={`flex-1 py-2 rounded-md font-medium transition-all duration-300 ${
+                  isSignUp ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shine-effect" : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
                 }`}
               >
                 Sign Up
@@ -285,7 +285,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       placeholder="Username"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -303,7 +303,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Email Address"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -321,7 +321,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Password"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -339,7 +339,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       placeholder="Company Name"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -357,7 +357,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       value={contactPerson}
                       onChange={(e) => setContactPerson(e.target.value)}
                       placeholder="Contact Person Name"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -376,7 +376,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       maxLength={10}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="Phone Number"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -425,7 +425,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       placeholder="Username"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -442,7 +442,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder="Current Password"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -459,7 +459,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="New Password"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -481,7 +481,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       placeholder="Username"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -498,7 +498,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Password"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors text-foreground placeholder:text-muted-foreground"
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
                   </div>
                 </div>
@@ -526,10 +526,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-6"
+              className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground py-3 rounded-xl font-semibold hover:from-primary/90 hover:to-secondary/90 transition-all duration-300 flex items-center justify-center gap-2 mt-6 shine-effect glow-primary-hover transform hover:scale-[1.02] hover:-translate-y-0.5"
             >
               {isForgotPassword ? "Update Password" : isSignUp ? "Create Account" : "Login"}
-              <ArrowRight size={20} />
+              <ArrowRight size={20} className="animate-bounce-subtle" />
             </button>
           </form>
 
