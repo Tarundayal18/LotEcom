@@ -9,6 +9,7 @@ interface ProductCardProps {
     id: string
     name: string
     category: string
+    productCode?: string
     price: number
     originalPrice?: number
     discountPercentage?: number
@@ -70,6 +71,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           {/* Brand */}
           <div className="text-sm text-muted-foreground uppercase tracking-wide mb-2 font-medium">
             {product.category}
+            {product.productCode && (
+              <span className="ml-2 px-2 py-1 bg-gradient-to-r from-primary/20 to-secondary/20 text-primary rounded-full text-xs font-semibold">
+                {product.productCode}
+              </span>
+            )}
           </div>
           
           {/* Product Name */}
