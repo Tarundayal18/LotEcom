@@ -10,7 +10,9 @@ interface ProductCardProps {
     name: string
     category: string
     productCode?: string
+    moq?: number
     price: number
+    totalPrice?: number
     originalPrice?: number
     discountPercentage?: number
     mainImage?: {
@@ -25,6 +27,11 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
+  
+  // Debug: Check totalPrice
+  console.log('ProductCard - totalPrice:', product.totalPrice)
+  console.log('ProductCard - moq:', product.moq)
+  console.log('ProductCard - price:', product.price)
   
   const discountAmount = product.originalPrice ? product.originalPrice - product.price : 0
   const discountPercentage = product.discountPercentage || 
@@ -83,15 +90,33 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             {product.name}
           </h3>
 
-          {/* Price */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
-              Rs. {product.price.toLocaleString('en-IN')}
-            </span>
-            {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-sm text-muted-foreground line-through">
-                Rs. {product.originalPrice.toLocaleString('en-IN')}
+          {/* Price and MOQ */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                Rs. {product.price.toLocaleString('en-IN')}
               </span>
+              {product.originalPrice && product.originalPrice > product.price && (
+                <span className="text-sm text-muted-foreground line-through">
+                  Rs. {product.originalPrice.toLocaleString('en-IN')}
+                </span>
+              )}
+            </div>
+            
+            {/* MOQ and Total Price */}
+            {product.moq && product.moq > 1 && (
+              <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-3 border border-primary/20">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium text-muted-foreground">MOQ:</span>
+                  <span className="text-sm font-bold text-primary">{product.moq} units</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">Total Price:</span>
+                  <span className="text-sm font-bold text-foreground">
+                    Rs. {(product.price * product.moq).toLocaleString('en-IN')}
+                  </span>
+                </div>
+              </div>
             )}
           </div>
 

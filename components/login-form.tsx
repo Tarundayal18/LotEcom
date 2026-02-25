@@ -167,11 +167,12 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     }
     
     const requestData = {
-      username,
-      password
+      username: username.trim(),
+      password: password.trim()
     }
     
     console.log("Login Request Data:", requestData)
+    console.log("API Endpoint:", 'https://lot-ecom-backend.onrender.com/api/v1/auth/login')
     
     try {
       const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/login', {
@@ -182,9 +183,11 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         body: JSON.stringify(requestData)
       })
       
+      console.log("Response Status:", response.status)
+      console.log("Response Headers:", response.headers)
+      
       const data = await response.json()
       console.log("Login Response Data:", data)
-      console.log("Response Status:", response.status)
       
       if (response.ok) {
         // Store token in localStorage
@@ -201,11 +204,13 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           showAlert("Account Pending", "Your account is pending admin approval. Please wait for approval before logging in.", "info")
         }
       } else {
-        showAlert("Login Failed", data.message || "Invalid username or password", "error")
+        console.error("Login failed with status:", response.status)
+        console.error("Error response:", data)
+        showAlert("Login Failed", data.message || data.error || "Invalid username or password", "error")
       }
-    } catch (error) {
-      console.error("Login Error:", error)
-      showAlert("Network Error", "Unable to connect to server. Please check your internet connection.", "error")
+    } catch (error: any) {
+      console.error("Network Error:", error)
+      showAlert("Network Error", `Unable to connect to server: ${error?.message || 'Unknown error'}. Please check your internet connection.`, "error")
     }
   }
 

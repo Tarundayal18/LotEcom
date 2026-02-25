@@ -9,7 +9,9 @@ interface Product {
   name: string
   category: string
   productCode?: string
+  moq?: number
   price: number
+  totalPrice?: number
   originalPrice?: number
   discountPercentage?: number
   rating?: number
@@ -62,6 +64,8 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
           }
         } else {
           const data = await response.json()
+          console.log('API Response Data:', data)
+          console.log('First product from API:', (data.products || data.data || [])[0])
           setProducts(data.products || data.data || [])
           setTotalPages(data.totalPages || Math.ceil((data.total || data.count) / 10))
         }
@@ -81,27 +85,8 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
     fetchProducts()
   }, [currentPage])
 
-  // Get unique categories with product codes from products
-  const categoriesWithCodes = useMemo(() => {
-    const categoryMap = new Map<string, string[]>()
-    
-    products.forEach(product => {
-      if (!categoryMap.has(product.category)) {
-        categoryMap.set(product.category, [])
-      }
-      if (product.productCode) {
-        const codes = categoryMap.get(product.category)!
-        if (!codes.includes(product.productCode)) {
-          codes.push(product.productCode)
-        }
-      }
-    })
-    
-    return Array.from(categoryMap.entries()).map(([category, codes]) => ({
-      category,
-      codes: codes.sort()
-    }))
-  }, [products])
+  // Get unique categories from products
+  const categories = [...new Set(products.map(product => product.category))]
 
   // Filter products by category
   const filteredProducts = useMemo(() => {
@@ -165,7 +150,7 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
                   >
                     All Products
                   </button>
-                  {categoriesWithCodes.map(({ category, codes }) => (
+                  {categories.map((category) => (
                     <button
                       key={category}
                       onClick={() => setSelectedCategory(category)}
@@ -175,14 +160,7 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
                           : "text-muted-foreground hover:text-foreground hover:bg-secondary/20 hover:translate-x-1"
                       }`}
                     >
-                      <div className="flex flex-col items-start">
-                        <span>{category}</span>
-                        {codes.length > 0 && (
-                          <span className="text-xs text-muted-foreground mt-1">
-                            Codes: {codes.join(", ")}
-                          </span>
-                        )}
-                      </div>
+                      {category}
                     </button>
                   ))}
                 </div>
@@ -252,7 +230,9 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
                           name: product.name,
                           category: product.category,
                           productCode: product.productCode,
+                          moq: product.moq,
                           price: product.price,
+                          totalPrice: product.totalPrice,
                           originalPrice: product.originalPrice,
                           discountPercentage: product.discountPercentage,
                           mainImage: product.mainImage,

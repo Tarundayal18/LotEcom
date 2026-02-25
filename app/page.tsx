@@ -12,7 +12,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState("products")
   const [cartOpen, setCartOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [cartItems, setCartItems] = useState<Array<{ id: string; name: string; price: number; quantity: number }>>([])
+  const [cartItems, setCartItems] = useState<Array<{ id: string; name: string; price: number; quantity: number; moq?: number }>>([])
   const [userData, setUserData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [quantityUpdateTimeout, setQuantityUpdateTimeout] = useState<NodeJS.Timeout | null>(null)
@@ -140,7 +140,7 @@ export default function Home() {
     }
   }
 
-  const processCartData = (data: any) => {
+  const processCartData = async (data: any) => {
     console.log('Cart data response:', data)
     
     if (data.success && data.data && data.data.items) {
@@ -148,15 +148,54 @@ export default function Home() {
       const cartItems = data.data.items
       console.log('Cart items array:', cartItems)
       
-      const formattedItems = cartItems.map((item: any) => {
+      const formattedItems = await Promise.all(cartItems.map(async (item: any) => {
         console.log('Processing cart item:', item)
+        console.log('productId:', item.productId)
+        console.log('productId.totalPrice:', item.productId?.totalPrice)
+        console.log('productId.price:', item.productId?.price)
+        console.log('productId.moq:', item.productId?.moq)
+        console.log('Full productId object:', JSON.stringify(item.productId, null, 2))
+        
+        // Check if moq exists, if not try to fetch product details
+        let moq = item.productId?.moq
+        
+        if (!moq) {
+          console.log('MOQ not found for product:', item.productId?.name, 'fetching product details...')
+          try {
+            const token = localStorage.getItem('authToken')
+            const productResponse = await fetch(`https://lot-ecom-backend.onrender.com/api/v1/products/${item.productId.id || item.productId._id}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            })
+            
+            if (productResponse.ok) {
+              const productData = await productResponse.json()
+              console.log('Fetched product data:', productData)
+              moq = productData.data?.moq || productData.moq || 1
+              console.log('Found MOQ from product API:', moq)
+            }
+          } catch (error) {
+            console.log('Failed to fetch product details, using MOQ = 1')
+            moq = 1
+          }
+        }
+        
+        // If moq is still undefined or null, set to 1
+        if (!moq) {
+          console.log('MOQ still not found for product:', item.productId?.name, 'setting to 1')
+          moq = 1
+        }
+        
         return {
           id: item.productId.id || item.productId._id,
           name: item.productId.name,
+          totalPrice: item.productId.totalPrice || item.productId.price,
           price: item.productId.price,
+          moq: moq,
           quantity: item.quantity
         }
-      })
+      }))
       
       console.log('Formatted cart items:', formattedItems)
       setCartItems(formattedItems)
@@ -378,7 +417,7 @@ export default function Home() {
           items: currentCartItems.map(item => ({
             productId: item.id,
             quantity: item.quantity,
-            price: item.price
+            price: item.price * (item.moq || 1)
           }))
         })
       })

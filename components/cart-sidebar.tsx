@@ -6,6 +6,8 @@ interface CartItem {
   id: string
   name: string
   price: number
+  totalPrice?: number
+  moq?: number
   quantity: number
 }
 
@@ -21,7 +23,7 @@ interface CartSidebarProps {
 }
 
 export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity, onClearAll, onCheckout, isCheckingOut = false }: CartSidebarProps) {
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const total = items.reduce((sum, item) => sum + (item.price * (item.moq || 1) * item.quantity), 0)
 
   return (
     <>
@@ -62,7 +64,7 @@ export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity
                 >
                   <div className="flex-1">
                     <h3 className="font-semibold text-foreground line-clamp-2">{item.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">${item.price.toFixed(2)}</p>
+                    <p className="text-sm text-muted-foreground mt-1">Rs. {item.price.toLocaleString('en-IN')} × {item.moq || 1} (MOQ)</p>
                     
                     {/* Quantity Controls */}
                     <div className="flex items-center gap-2 mt-2">
@@ -88,7 +90,7 @@ export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity
                     </div>
                     
                     <p className="text-sm font-semibold text-primary mt-2">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      Rs. {(item.price * (item.moq || 1) * item.quantity).toLocaleString('en-IN')}
                     </p>
                   </div>
                   <button
@@ -109,7 +111,7 @@ export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity
             <div className="space-y-4">
               <div className="flex items-center justify-between text-lg font-bold text-foreground">
                 <span>Total:</span>
-                <span className="text-primary">${total.toFixed(2)}</span>
+                <span className="text-primary">Rs. {total.toLocaleString('en-IN')}</span>
               </div>
               <button 
                 onClick={onCheckout}
