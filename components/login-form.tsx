@@ -74,7 +74,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         showAlert("Validation Error", "New password must be at least 6 characters", "error")
         return
       }
-      
+
       try {
         const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/forgot-password', {
           method: 'POST',
@@ -87,9 +87,9 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             newPassword
           })
         })
-        
+
         const data = await response.json()
-        
+
         if (response.ok) {
           showAlert("Success", "Password updated successfully!", "success")
           setIsForgotPassword(false)
@@ -111,7 +111,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       if (!companyName) emptyFields.push("Company Name")
       if (!contactPerson) emptyFields.push("Contact Person")
       if (!phone) emptyFields.push("Phone Number")
-      
+
       if (emptyFields.length > 0) {
         showAlert("Validation Error", `Please fill in the following fields: ${emptyFields.join(", ")}`, "error")
         return
@@ -144,9 +144,9 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             phone
           })
         })
-        
+
         const data = await response.json()
-        
+
         if (response.ok) {
           showAlert("Registration Successful", "Your account has been created! Please wait for admin approval before logging in.", "success")
           setIsSignUp(false)
@@ -165,15 +165,15 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       showAlert("Validation Error", "Please enter both username and password", "error")
       return
     }
-    
+
     const requestData = {
       username: username.trim(),
       password: password.trim()
     }
-    
+
     console.log("Login Request Data:", requestData)
     console.log("API Endpoint:", 'https://lot-ecom-backend.onrender.com/api/v1/auth/login')
-    
+
     try {
       const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/login', {
         method: 'POST',
@@ -182,20 +182,20 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         },
         body: JSON.stringify(requestData)
       })
-      
+
       console.log("Response Status:", response.status)
       console.log("Response Headers:", response.headers)
-      
+
       const data = await response.json()
       console.log("Login Response Data:", data)
-      
+
       if (response.ok) {
         // Store token in localStorage
         if (data.token) {
           localStorage.setItem('authToken', data.token)
           console.log("Token stored in localStorage:", data.token)
         }
-        
+
         // If token exists, login regardless of approval status
         if (data.token) {
           onLogin(data)
@@ -219,12 +219,16 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       <div className="w-full max-w-md">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-2xl mb-6 mx-auto animate-float glow-primary">
-            <span className="text-3xl">⚡</span>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 mx-auto animate-float glow-primary">
+            <img
+              src="/Logo/mainlogo.png"
+              alt="TechHub Logo"
+              className="w-full h-full rounded-2xl"
+            />
           </div>
-          <h1 className="text-4xl font-bold text-foreground mb-3 text-balance animate-bounce-subtle">Welcome to TechHub</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-3 text-balance animate-bounce-subtle">Welcome to Little Other Things</h1>
           <p className="text-lg text-muted-foreground text-balance">
-            Your B2B electronics partner for premium tech solutions
+            Your Wholesale and B2B Marketplace
           </p>
         </div>
 
@@ -238,9 +242,8 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   setIsSignUp(false)
                   clearAllFields()
                 }}
-                className={`flex-1 py-2 rounded-md font-medium transition-all duration-300 ${
-                  !isSignUp ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shine-effect" : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                }`}
+                className={`flex-1 py-2 rounded-md font-medium transition-all duration-300 ${!isSignUp ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shine-effect" : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                  }`}
               >
                 Login
               </button>
@@ -249,9 +252,8 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   setIsSignUp(true)
                   clearAllFields()
                 }}
-                className={`flex-1 py-2 rounded-md font-medium transition-all duration-300 ${
-                  isSignUp ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shine-effect" : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                }`}
+                className={`flex-1 py-2 rounded-md font-medium transition-all duration-300 ${isSignUp ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shine-effect" : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                  }`}
               >
                 Sign Up
               </button>
@@ -538,22 +540,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             </button>
           </form>
 
-          {!isForgotPassword && !isSignUp && (
-            <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-xs text-muted-foreground text-center mb-3">Demo credentials:</p>
-              <div className="space-y-1 text-xs text-muted-foreground">
-                <p>
-                  Username: <span className="text-foreground font-mono">demo_user</span>
-                </p>
-                <p>
-                  Password: <span className="text-foreground font-mono">demo123456</span>
-                </p>
-              </div>
-            </div>
-          )}
+
         </div>
       </div>
-      
+
       {/* Alert Popup */}
       <AlertPopup
         isOpen={alertPopup.isOpen}

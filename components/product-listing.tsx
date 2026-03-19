@@ -44,7 +44,7 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const response = await fetch(`https://lot-ecom-backend.onrender.com/api/v1/products?page=${currentPage}&limit=10`)
+        const response = await fetch(`https://lot-ecom-backend.onrender.com/api/v1/products?page=${currentPage}&limit=9`)
         
         if (!response.ok) {
           if (response.status === 429) {
@@ -117,10 +117,10 @@ export function ProductListing({ onAddToCart, isAddingToCart = false }: ProductL
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary via-secondary to-primary/20 animate-gradient border-b border-border py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-5xl font-bold text-foreground mb-4 text-balance animate-bounce-subtle">Premium Electronics</h1>
-          <p className="text-xl text-muted-foreground text-balance">
+          <h1 className="text-5xl font-bold text-foreground mb-4 text-balance animate-bounce-subtle">Wholesale Marketplace</h1>
+          {/* <p className="text-xl text-muted-foreground text-balance">
             Browse our curated selection of enterprise-grade components and systems
-          </p>
+          </p> */}
         </div>
       </div>
 

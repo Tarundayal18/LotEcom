@@ -527,10 +527,12 @@ export default function Home() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-lg glow-primary animate-float">
-                ⚡
-              </div>
-              <span className="text-xl font-bold text-foreground hidden sm:block">TechHub</span>
+              <img 
+                src="/Logo/mainlogo.png" 
+                alt="TechHub Logo" 
+                className="w-10 h-10 rounded-lg glow-primary animate-float"
+              />
+              <span className="text-xl font-bold text-foreground hidden sm:block">Little Other Things</span>
             </div>
 
             {/* Mobile Menu Button */}
@@ -638,15 +640,17 @@ export default function Home() {
       />
 
       {/* Footer */}
-      {isLoggedIn && (
+      {/* {isLoggedIn && (
         <footer className="border-t border-border bg-card mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <h3 className="font-bold text-lg text-foreground mb-4 flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm glow-primary animate-float">
-                    ⚡
-                  </div>
+                  <img 
+                    src="/Logo/mainlogo.png" 
+                    alt="TechHub Logo" 
+                    className="w-8 h-8 rounded-lg glow-primary animate-float"
+                  />
                   TechHub
                 </h3>
                 <p className="text-muted-foreground text-sm">Your trusted B2B electronics supplier.</p>
@@ -685,7 +689,7 @@ export default function Home() {
             </div>
           </div>
         </footer>
-      )}
+      )} */}
     </div>
   )
 }
