@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
-import { Mail, Lock, User, Building2, Phone, Tag, ArrowRight, ChevronDown } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Mail, Lock, User, Building2, Phone, Tag, ArrowRight, ChevronDown, Loader2 } from "lucide-react"
 import { AlertPopup } from "./alert-popup"
 
 interface LoginFormProps {
@@ -29,6 +29,11 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     type: "info" as "error" | "success" | "info"
   })
 
+  // Field validation states
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({})
+  const [isLoading, setIsLoading] = useState(false)
+
   const categories = [
     "Manufacturing",
     "Retail",
@@ -48,6 +53,83 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     setAlertPopup(prev => ({ ...prev, isOpen: false }))
   }
 
+  // Validation functions
+  const validateField = (fieldName: string, value: string): string => {
+    switch (fieldName) {
+      case 'username':
+        if (!value.trim()) return 'Username is required'
+        return ''
+      
+      case 'email':
+        if (!value.trim()) return 'Email is required'
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Please enter a valid email address'
+        return ''
+      
+      case 'password':
+        if (!value) return 'Password is required'
+        return ''
+      
+      case 'confirmPassword':
+        if (!value) return 'Please confirm your password'
+        if (value !== password) return 'Passwords do not match'
+        return ''
+      
+      case 'companyName':
+        if (!value.trim()) return 'Company name is required'
+        return ''
+      
+      case 'contactPerson':
+        if (!value.trim()) return 'Contact person name is required'
+        return ''
+      
+      case 'phone':
+        if (!value.trim()) return 'Phone number is required'
+        const cleanPhone = value.replace(/\D/g, '')
+        if (cleanPhone.length < 10) return 'Phone number must be at least 10 digits'
+        if (cleanPhone.length > 10) return 'Phone number must be exactly 10 digits'
+        if (!/^[6-9]/.test(cleanPhone)) return 'Phone number must start with 6, 7, 8, or 9'
+        return ''
+      
+      case 'currentPassword':
+        if (!value) return 'Current password is required'
+        return ''
+      
+      case 'newPassword':
+        if (!value) return 'New password is required'
+        return ''
+      
+      default:
+        return ''
+    }
+  }
+
+  // Real-time validation
+  const handleFieldChange = (fieldName: string, value: string) => {
+    // Update field value
+    switch (fieldName) {
+      case 'username': setUsername(value); break
+      case 'email': setEmail(value); break
+      case 'password': setPassword(value); break
+      case 'companyName': setCompanyName(value); break
+      case 'contactPerson': setContactPerson(value); break
+      case 'phone': setPhone(value); break
+      case 'currentPassword': setCurrentPassword(value); break
+      case 'newPassword': setNewPassword(value); break
+    }
+
+    // Validate if field has been touched
+    if (touchedFields[fieldName]) {
+      const error = validateField(fieldName, value)
+      setFieldErrors(prev => ({ ...prev, [fieldName]: error }))
+    }
+  }
+
+  const handleFieldBlur = (fieldName: string, value: string) => {
+    setTouchedFields(prev => ({ ...prev, [fieldName]: true }))
+    const error = validateField(fieldName, value)
+    setFieldErrors(prev => ({ ...prev, [fieldName]: error }))
+  }
+
   const clearAllFields = () => {
     setUsername("")
     setPassword("")
@@ -59,6 +141,9 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     setCurrentPassword("")
     setNewPassword("")
     setError("")
+    setFieldErrors({})
+    setTouchedFields({})
+    setIsLoading(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,15 +151,21 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     setError("")
 
     if (isForgotPassword) {
-      if (!username || !currentPassword || !newPassword) {
-        showAlert("Validation Error", "Please fill in all fields", "error")
-        return
-      }
-      if (newPassword.length < 6) {
-        showAlert("Validation Error", "New password must be at least 6 characters", "error")
+      // Validate all forgot password fields
+      const forgotPasswordErrors: Record<string, string> = {}
+      forgotPasswordErrors.username = validateField('username', username)
+      forgotPasswordErrors.currentPassword = validateField('currentPassword', currentPassword)
+      forgotPasswordErrors.newPassword = validateField('newPassword', newPassword)
+      
+      const hasErrors = Object.values(forgotPasswordErrors).some(error => error)
+      if (hasErrors) {
+        setFieldErrors(forgotPasswordErrors)
+        setTouchedFields({ username: true, currentPassword: true, newPassword: true })
+        showAlert("Validation Error", "Please fix the errors in the form", "error")
         return
       }
 
+      setIsLoading(true)
       try {
         const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/forgot-password', {
           method: 'POST',
@@ -95,40 +186,45 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           setIsForgotPassword(false)
           clearAllFields()
         } else {
-          showAlert("Error", data.message || "Failed to update password", "error")
+          // Handle specific backend errors
+          const errorMessage = data.message || data.error || "Failed to update password"
+          if (errorMessage.toLowerCase().includes('user not found') || errorMessage.toLowerCase().includes('invalid username')) {
+            showAlert("User Not Found", "The username you entered does not exist in our system.", "error")
+          } else if (errorMessage.toLowerCase().includes('incorrect password') || errorMessage.toLowerCase().includes('invalid password')) {
+            showAlert("Incorrect Password", "The current password you entered is incorrect.", "error")
+          } else if (errorMessage.toLowerCase().includes('weak password') || errorMessage.toLowerCase().includes('password strength')) {
+            showAlert("Weak Password", "Please choose a stronger password with at least 6 characters, including uppercase, lowercase, and numbers.", "error")
+          } else {
+            showAlert("Update Failed", errorMessage, "error")
+          }
         }
       } catch (error) {
         showAlert("Network Error", "Unable to connect to server. Please check your internet connection.", "error")
+      } finally {
+        setIsLoading(false)
       }
       return
     }
 
     if (isSignUp) {
-      const emptyFields = []
-      if (!email) emptyFields.push("Email")
-      if (!password) emptyFields.push("Password")
-      if (!username) emptyFields.push("Username")
-      if (!companyName) emptyFields.push("Company Name")
-      if (!contactPerson) emptyFields.push("Contact Person")
-      if (!phone) emptyFields.push("Phone Number")
-
-      if (emptyFields.length > 0) {
-        showAlert("Validation Error", `Please fill in the following fields: ${emptyFields.join(", ")}`, "error")
-        return
-      }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showAlert("Validation Error", "Please enter a valid email address", "error")
-        return
-      }
-      if (password.length < 6) {
-        showAlert("Validation Error", "Password must be at least 6 characters long", "error")
-        return
-      }
-      if (!/^\d{10}$/.test(phone.replace(/\D/g, ""))) {
-        showAlert("Validation Error", "Please enter a valid 10-digit phone number", "error")
+      // Validate all signup fields
+      const signupErrors: Record<string, string> = {}
+      signupErrors.username = validateField('username', username)
+      signupErrors.email = validateField('email', email)
+      signupErrors.password = validateField('password', password)
+      signupErrors.companyName = validateField('companyName', companyName)
+      signupErrors.contactPerson = validateField('contactPerson', contactPerson)
+      signupErrors.phone = validateField('phone', phone)
+      
+      const hasErrors = Object.values(signupErrors).some(error => error)
+      if (hasErrors) {
+        setFieldErrors(signupErrors)
+        setTouchedFields({ username: true, email: true, password: true, companyName: true, contactPerson: true, phone: true })
+        showAlert("Validation Error", "Please fix the errors in the form", "error")
         return
       }
 
+      setIsLoading(true)
       try {
         const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/register', {
           method: 'POST',
@@ -152,16 +248,32 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           setIsSignUp(false)
           clearAllFields()
         } else {
-          showAlert("Registration Failed", data.message || "Unable to create account. Please try again.", "error")
+          // Handle specific backend errors
+          const errorMessage = data.message || data.error || "Unable to create account. Please try again."
+          if (errorMessage.toLowerCase().includes('user already exists') || errorMessage.toLowerCase().includes('username taken')) {
+            showAlert("Username Unavailable", "This username is already taken. Please choose a different one.", "error")
+          } else if (errorMessage.toLowerCase().includes('email already exists') || errorMessage.toLowerCase().includes('email taken')) {
+            showAlert("Email Already Registered", "An account with this email already exists. Please use a different email.", "error")
+          } else if (errorMessage.toLowerCase().includes('phone already exists') || errorMessage.toLowerCase().includes('phone taken')) {
+            showAlert("Phone Already Registered", "An account with this phone number already exists. Please use a different phone number.", "error")
+          } else if (errorMessage.toLowerCase().includes('invalid email')) {
+            showAlert("Invalid Email", "Please enter a valid email address.", "error")
+          } else if (errorMessage.toLowerCase().includes('invalid phone')) {
+            showAlert("Invalid Phone", "Please enter a valid phone number.", "error")
+          } else {
+            showAlert("Registration Failed", errorMessage, "error")
+          }
         }
       } catch (error) {
         showAlert("Network Error", "Unable to connect to server. Please check your internet connection.", "error")
+      } finally {
+        setIsLoading(false)
       }
       return
     }
 
-    // Login
-    if (!username || !password) {
+    // Login - only basic validation, let backend handle the rest
+    if (!username.trim() || !password.trim()) {
       showAlert("Validation Error", "Please enter both username and password", "error")
       return
     }
@@ -174,6 +286,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     console.log("Login Request Data:", requestData)
     console.log("API Endpoint:", 'https://lot-ecom-backend.onrender.com/api/v1/auth/login')
 
+    setIsLoading(true)
     try {
       const response = await fetch('https://lot-ecom-backend.onrender.com/api/v1/auth/login', {
         method: 'POST',
@@ -206,11 +319,28 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       } else {
         console.error("Login failed with status:", response.status)
         console.error("Error response:", data)
-        showAlert("Login Failed", data.message || data.error || "Invalid username or password", "error")
+        
+        // Handle specific backend errors
+        const errorMessage = data.message || data.error || "Invalid username or password"
+        if (errorMessage.toLowerCase().includes('user not found') || errorMessage.toLowerCase().includes('invalid username')) {
+          showAlert("User Not Found", "The username you entered does not exist in our system.", "error")
+        } else if (errorMessage.toLowerCase().includes('incorrect password') || errorMessage.toLowerCase().includes('invalid password')) {
+          showAlert("Incorrect Password", "The password you entered is incorrect.", "error")
+        } else if (errorMessage.toLowerCase().includes('account not approved') || errorMessage.toLowerCase().includes('pending approval')) {
+          showAlert("Account Pending Approval", "Your account is pending admin approval. Please wait for approval before logging in.", "info")
+        } else if (errorMessage.toLowerCase().includes('account suspended') || errorMessage.toLowerCase().includes('account blocked')) {
+          showAlert("Account Suspended", "Your account has been suspended. Please contact support.", "error")
+        } else if (errorMessage.toLowerCase().includes('inactive account')) {
+          showAlert("Inactive Account", "Your account is inactive. Please contact support.", "error")
+        } else {
+          showAlert("Login Failed", errorMessage, "error")
+        }
       }
     } catch (error: any) {
       console.error("Network Error:", error)
       showAlert("Network Error", `Unable to connect to server: ${error?.message || 'Unknown error'}. Please check your internet connection.`, "error")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -290,11 +420,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       id="username"
                       type="text"
                       value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      onChange={(e) => handleFieldChange('username', e.target.value)}
+                      onBlur={() => handleFieldBlur('username', username)}
                       placeholder="Username"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
+                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                        fieldErrors.username && touchedFields.username
+                          ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
+                          : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.username && touchedFields.username && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.username}</p>
+                  )}
                 </div>
 
                 {/* Email */}
@@ -308,11 +446,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       id="email-signup"
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => handleFieldChange('email', e.target.value)}
+                      onBlur={() => handleFieldBlur('email', email)}
                       placeholder="Email Address"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
+                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                        fieldErrors.email && touchedFields.email
+                          ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
+                          : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.email && touchedFields.email && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
+                  )}
                 </div>
 
                 {/* Password */}
@@ -326,11 +472,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       id="password-signup"
                       type="password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => handleFieldChange('password', e.target.value)}
+                      onBlur={() => handleFieldBlur('password', password)}
                       placeholder="Password"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
+                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                        fieldErrors.password && touchedFields.password
+                          ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
+                          : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.password && touchedFields.password && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>
+                  )}
                 </div>
 
                 {/* Company Name */}
@@ -344,11 +498,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       id="company"
                       type="text"
                       value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
+                      onChange={(e) => handleFieldChange('companyName', e.target.value)}
+                      onBlur={() => handleFieldBlur('companyName', companyName)}
                       placeholder="Company Name"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
+                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                        fieldErrors.companyName && touchedFields.companyName
+                          ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
+                          : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.companyName && touchedFields.companyName && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.companyName}</p>
+                  )}
                 </div>
 
                 {/* Contact Person */}
@@ -362,11 +524,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       id="contact"
                       type="text"
                       value={contactPerson}
-                      onChange={(e) => setContactPerson(e.target.value)}
+                      onChange={(e) => handleFieldChange('contactPerson', e.target.value)}
+                      onBlur={() => handleFieldBlur('contactPerson', contactPerson)}
                       placeholder="Contact Person Name"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
+                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                        fieldErrors.contactPerson && touchedFields.contactPerson
+                          ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
+                          : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.contactPerson && touchedFields.contactPerson && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.contactPerson}</p>
+                  )}
                 </div>
 
                 {/* Phone */}
@@ -381,11 +551,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       type="tel"
                       value={phone}
                       maxLength={10}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => handleFieldChange('phone', e.target.value)}
+                      onBlur={() => handleFieldBlur('phone', phone)}
                       placeholder="Phone Number"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
+                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                        fieldErrors.phone && touchedFields.phone
+                          ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
+                          : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.phone && touchedFields.phone && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.phone}</p>
+                  )}
                 </div>
 
                 {/* Category Dropdown */}
@@ -430,11 +608,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       id="username-forgot"
                       type="text"
                       value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      onChange={(e) => handleFieldChange('username', e.target.value)}
+                      onBlur={() => handleFieldBlur('username', username)}
                       placeholder="Username"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
+                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                        fieldErrors.username && touchedFields.username
+                          ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
+                          : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.username && touchedFields.username && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.username}</p>
+                  )}
                 </div>
 
                 <div>
@@ -447,11 +633,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       id="current-pass"
                       type="password"
                       value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      onChange={(e) => handleFieldChange('currentPassword', e.target.value)}
+                      onBlur={() => handleFieldBlur('currentPassword', currentPassword)}
                       placeholder="Current Password"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
+                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                        fieldErrors.currentPassword && touchedFields.currentPassword
+                          ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
+                          : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.currentPassword && touchedFields.currentPassword && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.currentPassword}</p>
+                  )}
                 </div>
 
                 <div>
@@ -464,11 +658,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                       id="new-pass"
                       type="password"
                       value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
+                      onChange={(e) => handleFieldChange('newPassword', e.target.value)}
+                      onBlur={() => handleFieldBlur('newPassword', newPassword)}
                       placeholder="New Password"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
+                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                        fieldErrors.newPassword && touchedFields.newPassword
+                          ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
+                          : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.newPassword && touchedFields.newPassword && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.newPassword}</p>
+                  )}
                 </div>
               </>
             )}
@@ -533,10 +735,20 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground py-3 rounded-xl font-semibold hover:from-primary/90 hover:to-secondary/90 transition-all duration-300 flex items-center justify-center gap-2 mt-6 shine-effect glow-primary-hover transform hover:scale-[1.02] hover:-translate-y-0.5"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground py-3 rounded-xl font-semibold hover:from-primary/90 hover:to-secondary/90 transition-all duration-300 flex items-center justify-center gap-2 mt-6 shine-effect glow-primary-hover transform hover:scale-[1.02] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              {isForgotPassword ? "Update Password" : isSignUp ? "Create Account" : "Login"}
-              <ArrowRight size={20} className="animate-bounce-subtle" />
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin" size={20} />
+                  {isForgotPassword ? "Updating..." : isSignUp ? "Creating..." : "Signing in..."}
+                </>
+              ) : (
+                <>
+                  {isForgotPassword ? "Update Password" : isSignUp ? "Create Account" : "Login"}
+                  <ArrowRight size={20} className="animate-bounce-subtle" />
+                </>
+              )}
             </button>
           </form>
 
