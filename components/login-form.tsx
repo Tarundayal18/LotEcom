@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Mail, Lock, User, Building2, Phone, Tag, ArrowRight, ChevronDown, Loader2 } from "lucide-react"
+import { Mail, Lock, User, Building2, Phone, Tag, ArrowRight, ChevronDown, Loader2, Eye, EyeOff } from "lucide-react"
 import { AlertPopup } from "./alert-popup"
 
 interface LoginFormProps {
@@ -33,6 +33,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({})
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showSignupPassword, setShowSignupPassword] = useState(false)
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
 
   const categories = [
     "Manufacturing",
@@ -144,6 +148,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     setFieldErrors({})
     setTouchedFields({})
     setIsLoading(false)
+    setShowPassword(false)
+    setShowSignupPassword(false)
+    setShowCurrentPassword(false)
+    setShowNewPassword(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -470,17 +478,24 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                     <Lock className="absolute left-3 top-3 text-muted-foreground" size={20} />
                     <input
                       id="password-signup"
-                      type="password"
+                      type={showSignupPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => handleFieldChange('password', e.target.value)}
                       onBlur={() => handleFieldBlur('password', password)}
                       placeholder="Password"
-                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                      className={`w-full pl-10 pr-12 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
                         fieldErrors.password && touchedFields.password
                           ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
                           : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
                       }`}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupPassword(!showSignupPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showSignupPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
                   </div>
                   {fieldErrors.password && touchedFields.password && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>
@@ -631,17 +646,24 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                     <Lock className="absolute left-3 top-3 text-muted-foreground" size={20} />
                     <input
                       id="current-pass"
-                      type="password"
+                      type={showCurrentPassword ? "text" : "password"}
                       value={currentPassword}
                       onChange={(e) => handleFieldChange('currentPassword', e.target.value)}
                       onBlur={() => handleFieldBlur('currentPassword', currentPassword)}
                       placeholder="Current Password"
-                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                      className={`w-full pl-10 pr-12 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
                         fieldErrors.currentPassword && touchedFields.currentPassword
                           ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
                           : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
                       }`}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
                   </div>
                   {fieldErrors.currentPassword && touchedFields.currentPassword && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.currentPassword}</p>
@@ -656,17 +678,24 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                     <Lock className="absolute left-3 top-3 text-muted-foreground" size={20} />
                     <input
                       id="new-pass"
-                      type="password"
+                      type={showNewPassword ? "text" : "password"}
                       value={newPassword}
                       onChange={(e) => handleFieldChange('newPassword', e.target.value)}
                       onBlur={() => handleFieldBlur('newPassword', newPassword)}
                       placeholder="New Password"
-                      className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
+                      className={`w-full pl-10 pr-12 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
                         fieldErrors.newPassword && touchedFields.newPassword
                           ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
                           : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
                       }`}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
                   </div>
                   {fieldErrors.newPassword && touchedFields.newPassword && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.newPassword}</p>
@@ -703,12 +732,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                     <Lock className="absolute left-3 top-3 text-muted-foreground" size={20} />
                     <input
                       id="password-login"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Password"
-                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
+                      className="w-full pl-10 pr-12 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 text-foreground placeholder:text-muted-foreground hover:border-primary/50"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
                   </div>
                 </div>
 
