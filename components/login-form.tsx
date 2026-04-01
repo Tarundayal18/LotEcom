@@ -37,6 +37,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const [showSignupPassword, setShowSignupPassword] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState("")
 
   const categories = [
     "Manufacturing",
@@ -98,6 +99,11 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         if (!value) return 'Current password is required'
         return ''
       
+      case 'forgotEmail':
+        if (!value.trim()) return 'Email is required'
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Please enter a valid email address'
+        return ''
+      
       case 'newPassword':
         if (!value) return 'New password is required'
         return ''
@@ -119,6 +125,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       case 'phone': setPhone(value); break
       case 'currentPassword': setCurrentPassword(value); break
       case 'newPassword': setNewPassword(value); break
+      case 'forgotEmail': setForgotEmail(value); break
     }
 
     // Validate if field has been touched
@@ -144,6 +151,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     setCategory("")
     setCurrentPassword("")
     setNewPassword("")
+    setForgotEmail("")
     setError("")
     setFieldErrors({})
     setTouchedFields({})
@@ -161,14 +169,14 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     if (isForgotPassword) {
       // Validate all forgot password fields
       const forgotPasswordErrors: Record<string, string> = {}
-      forgotPasswordErrors.username = validateField('username', username)
+      forgotPasswordErrors.forgotEmail = validateField('forgotEmail', forgotEmail)
       forgotPasswordErrors.currentPassword = validateField('currentPassword', currentPassword)
       forgotPasswordErrors.newPassword = validateField('newPassword', newPassword)
       
       const hasErrors = Object.values(forgotPasswordErrors).some(error => error)
       if (hasErrors) {
         setFieldErrors(forgotPasswordErrors)
-        setTouchedFields({ username: true, currentPassword: true, newPassword: true })
+        setTouchedFields({ forgotEmail: true, currentPassword: true, newPassword: true })
         showAlert("Validation Error", "Please fix the errors in the form", "error")
         return
       }
@@ -181,7 +189,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            username,
+            email: forgotEmail,
             currentPassword,
             newPassword
           })
@@ -614,27 +622,27 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             {isForgotPassword && (
               <>
                 <div>
-                  <label htmlFor="username-forgot" className="block text-sm font-medium text-foreground mb-2">
-                    Username
+                  <label htmlFor="email-forgot" className="block text-sm font-medium text-foreground mb-2">
+                    Email Address
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 text-muted-foreground" size={20} />
+                    <Mail className="absolute left-3 top-3 text-muted-foreground" size={20} />
                     <input
-                      id="username-forgot"
-                      type="text"
-                      value={username}
-                      onChange={(e) => handleFieldChange('username', e.target.value)}
-                      onBlur={() => handleFieldBlur('username', username)}
-                      placeholder="Username"
+                      id="email-forgot"
+                      type="email"
+                      value={forgotEmail}
+                      onChange={(e) => handleFieldChange('forgotEmail', e.target.value)}
+                      onBlur={() => handleFieldBlur('forgotEmail', forgotEmail)}
+                      placeholder="Email Address"
                       className={`w-full pl-10 pr-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 text-foreground placeholder:text-muted-foreground ${
-                        fieldErrors.username && touchedFields.username
+                        fieldErrors.forgotEmail && touchedFields.forgotEmail
                           ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500'
                           : 'border-border focus:ring-primary/50 focus:border-primary hover:border-primary/50'
                       }`}
                     />
                   </div>
-                  {fieldErrors.username && touchedFields.username && (
-                    <p className="text-red-500 text-xs mt-1">{fieldErrors.username}</p>
+                  {fieldErrors.forgotEmail && touchedFields.forgotEmail && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.forgotEmail}</p>
                   )}
                 </div>
 
