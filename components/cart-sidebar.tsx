@@ -20,9 +20,12 @@ interface CartSidebarProps {
   onClearAll: () => void
   onCheckout: () => void
   isCheckingOut?: boolean
+  isRemovingFromCart?: boolean
+  isUpdatingQuantity?: boolean
+  isClearingCart?: boolean
 }
 
-export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity, onClearAll, onCheckout, isCheckingOut = false }: CartSidebarProps) {
+export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity, onClearAll, onCheckout, isCheckingOut = false, isRemovingFromCart = false, isUpdatingQuantity = false, isClearingCart = false }: CartSidebarProps) {
   const total = items.reduce((sum, item) => sum + (item.price * (item.moq || 1) * item.quantity), 0)
 
   return (

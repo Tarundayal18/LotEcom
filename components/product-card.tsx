@@ -23,9 +23,15 @@ interface ProductCardProps {
     isActive: boolean
   }
   onAddToCart: () => void
+  onRemoveFromCart?: (productId: string) => void
+  onUpdateQuantity?: (productId: string, quantity: number) => void
+  cartQuantity?: number
+  isAddingToCart?: boolean
+  isRemovingFromCart?: boolean
+  isUpdatingQuantity?: boolean
 }
 
-export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+export function ProductCard({ product, onAddToCart, onRemoveFromCart, onUpdateQuantity, cartQuantity = 0, isAddingToCart = false, isRemovingFromCart = false, isUpdatingQuantity = false }: ProductCardProps) {
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
   
   // Debug: Check totalPrice
@@ -120,14 +126,70 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             )}
           </div>
 
-          {/* Add to Cart Button */}
-          <button
-            onClick={onAddToCart}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-xl font-semibold hover:from-primary/90 hover:to-secondary/90 active:scale-95 transition-all duration-300 shine-effect glow-primary-hover transform hover:-translate-y-0.5"
-          >
-            <ShoppingCart size={20} className="animate-bounce-subtle" />
-            Add to Cart
-          </button>
+          {/* Add to Cart / Quantity Controls */}
+          <div className="flex gap-2">
+            {cartQuantity > 0 ? (
+              <>
+                {/* Show quantity controls if item is in cart */}
+                <div className="flex-1 flex items-center gap-2 bg-muted rounded-lg p-2">
+                  <button
+                    onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, Math.max(1, cartQuantity - 1))}
+                    disabled={isUpdatingQuantity || cartQuantity <= 1}
+                    className="w-8 h-8 flex items-center justify-center bg-background border border-border rounded hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="text-sm font-medium">-</span>
+                  </button>
+                  <span className="flex-1 text-center font-semibold text-foreground">
+                    {cartQuantity}
+                  </span>
+                  <button
+                    onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, cartQuantity + 1)}
+                    disabled={isUpdatingQuantity}
+                    className="w-8 h-8 flex items-center justify-center bg-background border border-border rounded hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="text-sm font-medium">+</span>
+                  </button>
+                </div>
+                <button
+                  onClick={() => onRemoveFromCart && onRemoveFromCart(product.id)}
+                  disabled={isRemovingFromCart}
+                  className="px-3 py-2 bg-destructive/20 text-destructive rounded-lg font-medium hover:bg-destructive/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isRemovingFromCart ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                      Removing...
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-sm">Remove from Cart</span>
+                    </>
+                  )}
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Show Add to Cart button if item is not in cart */}
+                <button
+                  onClick={onAddToCart}
+                  disabled={isAddingToCart}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-xl font-semibold hover:from-primary/90 hover:to-secondary/90 active:scale-95 transition-all duration-300 shine-effect glow-primary-hover transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {isAddingToCart ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current mr-2"></div>
+                      Adding...
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart size={20} className="animate-bounce-subtle" />
+                      Add to Cart
+                    </>
+                  )}
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

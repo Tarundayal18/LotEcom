@@ -640,7 +640,15 @@ export default function Home() {
         ) : currentPage === "profile" ? (
           <ProfilePage userData={userData} onUpdate={handleUpdateProfile} onBack={() => setCurrentPage("products")} />
         ) : (
-          <ProductListing onAddToCart={handleAddToCart} isAddingToCart={isAddingToCart} />
+          <ProductListing 
+            onAddToCart={handleAddToCart} 
+            isAddingToCart={isAddingToCart}
+            cartItems={cartItems}
+            onRemoveFromCart={handleRemoveFromCart}
+            onUpdateQuantity={handleUpdateQuantity}
+            isRemovingFromCart={isRemovingFromCart}
+            isUpdatingQuantity={isUpdatingQuantity}
+          />
         )}
       </main>
 
