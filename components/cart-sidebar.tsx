@@ -35,8 +35,8 @@ export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity
 
       {/* Sidebar */}
       <div
-        className={`fixed right-0 top-0 h-full w-full sm:w-96 bg-card border-l border-border shadow-xl z-50 transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed right-0 top-0 h-full w-full sm:w-96 bg-card border-l border-border shadow-xl z-50 transition-transform duration-300 flex flex-col ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Header */}
@@ -51,61 +51,69 @@ export function CartSidebar({ isOpen, onClose, items, onRemove, onUpdateQuantity
         </div>
 
         {/* Items */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
-              <ShoppingCart size={48} className="text-muted mb-4" />
-              <p className="text-lg font-semibold text-foreground mb-2">Your cart is empty</p>
-              <p className="text-muted-foreground">Add products to get started</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-start justify-between p-4 bg-muted rounded-lg border border-border hover:border-primary/30 transition-colors"
-                >
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground line-clamp-2">{item.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Rs. {item.price.toLocaleString('en-IN')} × {item.moq || 1} (MOQ)</p>
-                    
-                    {/* Quantity Controls */}
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-sm text-muted-foreground">Qty:</span>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => onUpdateQuantity(item.id, item.quantity > 1 ? item.quantity - 1 : 1)}
-                          className="w-6 h-6 flex items-center justify-center bg-background border border-border rounded hover:bg-muted transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={item.quantity <= 1}
-                        >
-                          -
-                        </button>
-                        <span className="w-8 text-center text-sm font-medium text-foreground">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                          className="w-6 h-6 flex items-center justify-center bg-background border border-border rounded hover:bg-muted transition-colors text-sm"
-                        >
-                          +
-                        </button>
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            {items.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-64 text-center">
+                <ShoppingCart size={48} className="text-muted mb-4" />
+                <p className="text-lg font-semibold text-foreground mb-2">Your cart is empty</p>
+                <p className="text-muted-foreground">Add products to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-3 bg-muted rounded-lg border border-border hover:border-primary/30 transition-all duration-200"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground text-sm line-clamp-2 mb-1">{item.name}</h3>
+                        <p className="text-xs text-muted-foreground mb-2">Rs. {item.price.toLocaleString('en-IN')} × {item.moq || 1} (MOQ)</p>
+                        
+                        {/* Quantity Controls */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">Qty:</span>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => onUpdateQuantity(item.id, item.quantity > 1 ? item.quantity - 1 : 1)}
+                                className="w-5 h-5 flex items-center justify-center bg-background border border-border rounded hover:bg-muted transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={item.quantity <= 1}
+                              >
+                                -
+                              </button>
+                              <span className="w-6 text-center text-xs font-medium text-foreground">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                                className="w-5 h-5 flex items-center justify-center bg-background border border-border rounded hover:bg-muted transition-colors text-xs"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs font-semibold text-primary">
+                              Rs. {(item.price * (item.moq || 1) * item.quantity).toLocaleString('en-IN')}
+                            </p>
+                            <button
+                              onClick={() => onRemove(item.id)}
+                              className="p-1 hover:bg-destructive/10 text-destructive rounded transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    
-                    <p className="text-sm font-semibold text-primary mt-2">
-                      Rs. {(item.price * (item.moq || 1) * item.quantity).toLocaleString('en-IN')}
-                    </p>
                   </div>
-                  <button
-                    onClick={() => onRemove(item.id)}
-                    className="p-2 hover:bg-destructive/10 text-destructive rounded-lg transition-colors ml-4"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Footer */}
