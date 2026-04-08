@@ -21,6 +21,7 @@ interface Product {
     url: string
   }
   quantity: number
+  stock: number
   isActive: boolean
 }
 
@@ -269,42 +270,57 @@ export function ProductListing({ onAddToCart, isAddingToCart = false, cartItems 
                       const cartItem = cartItems?.find(item => item.id === product.id)
                       const cartQuantity = cartItem ? cartItem.quantity : 0
                       
+                      const isOutOfStock = product.stock === 0
+                      
                       return (
-                        <ProductCard
-                          key={product.id}
-                          product={{
-                            id: product.id,
-                            name: product.name,
-                            category: product.category,
-                            productCode: product.productCode,
-                            moq: product.moq,
-                            price: product.price,
-                            totalPrice: product.totalPrice,
-                            originalPrice: product.originalPrice,
-                            discountPercentage: product.discountPercentage,
-                            mainImage: product.mainImage,
-                            quantity: product.quantity,
-                            isActive: product.isActive,
-                          }}
-                          onAddToCart={() => handleAddToCart(product)}
-                          onRemoveFromCart={(productId) => {
-                            // Find the item in cart and remove it
-                            const itemToRemove = cartItems?.find(item => item.id === productId)
-                            if (itemToRemove && onRemoveFromCart) {
-                              onRemoveFromCart(productId)
-                            }
-                          }}
-                          onUpdateQuantity={(productId, quantity) => {
-                            // Update quantity in cart
-                            if (onUpdateQuantity) {
-                              onUpdateQuantity(productId, quantity)
-                            }
-                          }}
-                          cartQuantity={cartQuantity}
-                          isAddingToCart={isAddingToCart}
-                          isRemovingFromCart={isRemovingFromCart}
-                          isUpdatingQuantity={isUpdatingQuantity}
-                        />
+                        <div key={product.id} className={`relative ${isOutOfStock ? 'opacity-50' : ''}`}>
+                          {isOutOfStock && (
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 rounded-xl flex items-center justify-center">
+                              <div className="text-center">
+                                <div className="bg-destructive text-white px-4 py-2 rounded-lg font-bold text-lg mb-2">
+                                  Out of Stock
+                                </div>
+                                <p className="text-white text-sm">This product is currently unavailable</p>
+                              </div>
+                            </div>
+                          )}
+                          <ProductCard
+                            product={{
+                              id: product.id,
+                              name: product.name,
+                              category: product.category,
+                              productCode: product.productCode,
+                              moq: product.moq,
+                              price: product.price,
+                              totalPrice: product.totalPrice,
+                              originalPrice: product.originalPrice,
+                              discountPercentage: product.discountPercentage,
+                              mainImage: product.mainImage,
+                              quantity: product.quantity,
+                              stock: product.stock,
+                              isActive: product.isActive,
+                            }}
+                            onAddToCart={() => !isOutOfStock && handleAddToCart(product)}
+                            onRemoveFromCart={(productId) => {
+                              // Find the item in cart and remove it
+                              const itemToRemove = cartItems?.find(item => item.id === productId)
+                              if (itemToRemove && onRemoveFromCart) {
+                                onRemoveFromCart(productId)
+                              }
+                            }}
+                            onUpdateQuantity={(productId, quantity) => {
+                              // Update quantity in cart
+                              if (onUpdateQuantity) {
+                                onUpdateQuantity(productId, quantity)
+                              }
+                            }}
+                            cartQuantity={cartQuantity}
+                            isAddingToCart={isAddingToCart}
+                            isRemovingFromCart={isRemovingFromCart}
+                            isUpdatingQuantity={isUpdatingQuantity}
+                            disabled={isOutOfStock}
+                          />
+                        </div>
                       )
                     })}
                   </div>

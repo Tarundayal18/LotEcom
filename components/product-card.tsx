@@ -20,6 +20,7 @@ interface ProductCardProps {
       url: string
     }
     quantity: number
+    stock: number
     isActive: boolean
   }
   onAddToCart: () => void
@@ -29,9 +30,10 @@ interface ProductCardProps {
   isAddingToCart?: boolean
   isRemovingFromCart?: boolean
   isUpdatingQuantity?: boolean
+  disabled?: boolean
 }
 
-export function ProductCard({ product, onAddToCart, onRemoveFromCart, onUpdateQuantity, cartQuantity = 0, isAddingToCart = false, isRemovingFromCart = false, isUpdatingQuantity = false }: ProductCardProps) {
+export function ProductCard({ product, onAddToCart, onRemoveFromCart, onUpdateQuantity, cartQuantity = 0, isAddingToCart = false, isRemovingFromCart = false, isUpdatingQuantity = false, disabled = false }: ProductCardProps) {
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
   
   // Debug: Check totalPrice
@@ -172,7 +174,7 @@ export function ProductCard({ product, onAddToCart, onRemoveFromCart, onUpdateQu
                 {/* Show Add to Cart button if item is not in cart */}
                 <button
                   onClick={onAddToCart}
-                  disabled={isAddingToCart}
+                  disabled={isAddingToCart || disabled}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-xl font-semibold hover:from-primary/90 hover:to-secondary/90 active:scale-95 transition-all duration-300 shine-effect glow-primary-hover transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isAddingToCart ? (
