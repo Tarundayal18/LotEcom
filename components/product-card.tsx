@@ -20,7 +20,7 @@ interface ProductCardProps {
       url: string
     }
     quantity: number
-    stock: number
+    stock?: number
     isActive: boolean
   }
   onAddToCart: () => void
@@ -30,10 +30,9 @@ interface ProductCardProps {
   isAddingToCart?: boolean
   isRemovingFromCart?: boolean
   isUpdatingQuantity?: boolean
-  disabled?: boolean
 }
 
-export function ProductCard({ product, onAddToCart, onRemoveFromCart, onUpdateQuantity, cartQuantity = 0, isAddingToCart = false, isRemovingFromCart = false, isUpdatingQuantity = false, disabled = false }: ProductCardProps) {
+export function ProductCard({ product, onAddToCart, onRemoveFromCart, onUpdateQuantity, cartQuantity = 0, isAddingToCart = false, isRemovingFromCart = false, isUpdatingQuantity = false }: ProductCardProps) {
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
   
   // Debug: Check totalPrice
@@ -55,9 +54,15 @@ export function ProductCard({ product, onAddToCart, onRemoveFromCart, onUpdateQu
     setIsImageViewerOpen(false)
   }
 
+  const isOutOfStock = product.stock === 0 || product.quantity === 0
+  
   return (
     <>
-      <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 group hover:scale-[1.02] hover:-translate-y-1 glow-primary-hover">
+      <div className={`bg-card border border-border rounded-xl overflow-hidden transition-all duration-500 group glow-primary-hover relative ${
+        isOutOfStock 
+          ? 'opacity-80 hover:scale-100 hover:-translate-y-0' 
+          : 'hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1'
+      }`}>
         {/* Image Container */}
         <div className="relative h-64 bg-muted overflow-hidden cursor-pointer" onClick={openImageViewer}>
           <img
@@ -128,9 +133,29 @@ export function ProductCard({ product, onAddToCart, onRemoveFromCart, onUpdateQu
             )}
           </div>
 
+          {/* Out of Stock Badge */}
+          {isOutOfStock && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl z-10">
+              <div className="text-center">
+                <div className="bg-destructive text-white px-4 py-2 rounded-full font-bold text-lg mb-2">
+                  Out of Stock
+                </div>
+                <p className="text-white text-sm">This product is currently unavailable</p>
+              </div>
+            </div>
+          )}
+
           {/* Add to Cart / Quantity Controls */}
           <div className="flex gap-2">
-            {cartQuantity > 0 ? (
+            {isOutOfStock ? (
+              <button
+                disabled
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-muted text-muted-foreground rounded-xl font-semibold cursor-not-allowed"
+              >
+                <ShoppingCart size={20} />
+                Out of Stock
+              </button>
+            ) : cartQuantity > 0 ? (
               <>
                 {/* Show quantity controls if item is in cart */}
                 <div className="flex-1 flex items-center gap-2 bg-muted rounded-lg p-2">
@@ -174,7 +199,7 @@ export function ProductCard({ product, onAddToCart, onRemoveFromCart, onUpdateQu
                 {/* Show Add to Cart button if item is not in cart */}
                 <button
                   onClick={onAddToCart}
-                  disabled={isAddingToCart || disabled}
+                  disabled={isAddingToCart}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-xl font-semibold hover:from-primary/90 hover:to-secondary/90 active:scale-95 transition-all duration-300 shine-effect glow-primary-hover transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isAddingToCart ? (
